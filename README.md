@@ -32,7 +32,7 @@ Include the script directly in your HTML:
 <script src="welcomesign.js"></script>
 <script>
   const client = WelcomeSign.createClient({
-    baseURL: 'https://api.welcomesign.com/v1'
+    baseURL: 'https://api.welcomesign.com'
   });
 </script>
 ```
@@ -45,7 +45,7 @@ const WelcomeSign = require('./welcomesign.js');
 import WelcomeSign from './welcomesign.js';
 
 const client = WelcomeSign.createClient({
-  baseURL: 'https://api.welcomesign.com/v1'
+  baseURL: 'https://api.welcomesign.com'
 });
 ```
 
@@ -54,7 +54,7 @@ const client = WelcomeSign.createClient({
 ```javascript
 // Create a client with automatic token persistence
 const client = WelcomeSign.createClient({
-  baseURL: 'https://api.welcomesign.com/v1'
+  baseURL: 'https://api.welcomesign.com'
 });
 
 // Register a new user
@@ -93,9 +93,8 @@ The API is available at the following endpoints:
 
 | Environment | URL |
 |-------------|-----|
-| Production | `https://api.welcomesign.com/v1` |
-| Staging | `https://staging-api.welcomesign.com/v1` |
-| Local Development | `http://localhost:8080/v1` |
+| Production | `https://api.welcomesign.com` |
+| Staging | `https://staging-api.welcomesign.com` |
 
 ## Authentication
 
@@ -104,7 +103,7 @@ The API is available at the following endpoints:
 ```javascript
 // Basic client (manual token management)
 const client = new WelcomeSign.WelcomeSignClient({
-  baseURL: 'https://api.welcomesign.com/v1',
+  baseURL: 'https://api.welcomesign.com',
   token: 'your-jwt-token',           // Optional: initial access token
   refreshToken: 'your-refresh-token', // Optional: for automatic refresh
   onTokenRefresh: (tokens) => {
@@ -119,7 +118,7 @@ const client = new WelcomeSign.WelcomeSignClient({
 
 // Client with automatic persistence (recommended)
 const client = WelcomeSign.createClient({
-  baseURL: 'https://api.welcomesign.com/v1',
+  baseURL: 'https://api.welcomesign.com',
   storage: localStorage,              // Optional: defaults to localStorage in browser
   storageKey: 'welcomesign_tokens'    // Optional: storage key name
 });
@@ -199,7 +198,7 @@ client.stopDeviceHeartbeat(heartbeatId);
 
 ```javascript
 const client = WelcomeSign.createClient({
-  baseURL: 'https://api.welcomesign.com/v1',
+  baseURL: 'https://api.welcomesign.com',
   onDeviceSessionInvalid: () => {
     // Device was unpaired or session expired
     // Clear local state and restart pairing flow
@@ -584,7 +583,7 @@ The client automatically refreshes expired tokens when a 401 response is receive
 
 ```javascript
 const client = WelcomeSign.createClient({
-  baseURL: 'https://api.welcomesign.com/v1',
+  baseURL: 'https://api.welcomesign.com',
   onTokenRefresh: (tokens) => {
     // Tokens were automatically refreshed
     console.log('Tokens refreshed:', tokens.token);

@@ -1,0 +1,537 @@
+/properties/{property_id}/devices:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Devices
+    summary: List property devices
+    description: Get all TV/screen devices for a property. User must have access to the property.
+    responses:
+      '200':
+        description: List of devices
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Device.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this property
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+/properties/{property_id}/devices/{device_id}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - $ref: '../parameters/common.yaml#/DeviceId'
+
+  get:
+    tags:
+      - Devices
+    summary: Get device details
+    responses:
+      '200':
+        description: Device details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Device.yaml'
+
+  put:
+    tags:
+      - Devices
+    summary: Update device
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              location:
+                type: string
+              settings:
+                type: object
+                description: Device-specific settings (brightness, orientation, etc)
+    responses:
+      '200':
+        description: Device updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Device.yaml'
+
+  delete:
+    tags:
+      - Devices
+    summary: Delete device
+    responses:
+      '200':
+        description: Device deleted
+
+/properties/{property_id}/devices/{device_id}/ping:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - $ref: '../parameters/common.yaml#/DeviceId'
+
+  post:
+    tags:
+      - Devices
+    summary: Device heartbeat
+    description: Update device last seen timestamp
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [online, offline, error]
+              metadata:
+                type: object
+                description: Device status metadata (battery, network, etc)
+    responses:
+      '200':
+        description: Heartbeat received
+
+/properties/{property_id}/devices/{device_id}/restart:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - $ref: '../parameters/common.yaml#/DeviceId'
+
+  post:
+    tags:
+      - Devices
+    summary: Restart device
+    description: Send restart command to device
+    responses:
+      '200':
+        description: Restart command sent
+
+/devices/register:
+  post:
+    tags:
+      - Devices
+    summary: Register device using pairing code
+    description: |
+      Register a device to a property using a pairing code obtained from the device.
+      The pairing code is verified and consumed (deleted) upon successful registration.
+      If the device already exists, it will be re-registered to the new property.
+      User must have access to the specified property.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - property_id
+              - platform
+            properties:
+              code:
+                type: string
+                description: 6-character pairing code from the device
+                example: ABC123
+              property_id:
+                type: string
+                format: uuid
+                description: UUID of the property to register device to
+                example: 550e8400-e29b-41d4-a716-446655440000
+              platform:
+                type: string
+                enum: [roku, android, firetv, webos, tizen, smart_tv, web]
+                example: roku
+              name:
+                type: string
+                description: Optional human-friendly device name
+                example: Living Room TV
+              room_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Optional room ID to assign device to a specific room
+                example: 550e8400-e29b-41d4-a716-446655440002
+    responses:
+      '201':
+        description: Device registered successfully (new device)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 201
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    device:
+                      $ref: '../schemas/Device.yaml'
+                    device_id:
+                      type: string
+                      format: uuid
+                      description: UUID of the registered device
+                      example: 550e8400-e29b-41d4-a716-446655440001
+                    device_token:
+                      type: string
+                      description: |
+                        Secure device token for authentication. Store this securely on the device.
+                        Use this token in the Authorization header for device-initiated requests.
+                      example: a1b2c3d4e5f6...64-character-hex-string
+                    property:
+                      $ref: '../schemas/Property.yaml'
+                    message:
+                      type: string
+                      example: Device registered successfully. Save the device_token for authentication.
+      '200':
+        description: Device re-registered successfully (existing device with new token)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    device:
+                      $ref: '../schemas/Device.yaml'
+                    device_id:
+                      type: string
+                      format: uuid
+                      description: UUID of the re-registered device
+                      example: 550e8400-e29b-41d4-a716-446655440001
+                    device_token:
+                      type: string
+                      description: |
+                        New secure device token for authentication. Previous token is invalidated.
+                        Store this securely on the device.
+                      example: a1b2c3d4e5f6...64-character-hex-string
+                    property:
+                      $ref: '../schemas/Property.yaml'
+                    message:
+                      type: string
+                      example: Device re-registered successfully. Save the device_token for authentication.
+      '400':
+        description: Missing required field
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              missing_code:
+                value:
+                  error: true
+                  message: Pairing code is required
+              missing_property:
+                value:
+                  error: true
+                  message: Property ID is required
+              missing_platform:
+                value:
+                  error: true
+                  message: Platform is required (e.g., roku, android, smart_tv)
+      '403':
+        description: Access denied or subscription limit reached
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              access_denied:
+                summary: User doesn't have access to property
+                value:
+                  error: true
+                  message: Access denied to this property
+              device_limit:
+                summary: Device limit reached
+                value:
+                  error: true
+                  message: "You have reached the maximum devices for your plan (limit: 10). Please upgrade your subscription."
+      '404':
+        description: Invalid or expired pairing code
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Invalid or expired pairing code
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+/devices:
+  get:
+    tags:
+      - Devices
+    summary: List all devices
+    description: Get all devices across all properties for authenticated user
+    responses:
+      '200':
+        description: List of devices
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Device.yaml'
+
+/devices/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  get:
+    tags:
+      - Devices
+    summary: Get device details
+    responses:
+      '200':
+        description: Device details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Device.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this device
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Device not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+  put:
+    tags:
+      - Devices
+    summary: Update device
+    description: |
+      Update device information. Cannot change property_id or device_identifier.
+      User must have access to the device.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Living Room TV
+              location:
+                type: string
+                example: Living Room
+              platform:
+                type: string
+                enum: [roku, android, firetv, webos, tizen, smart_tv, web]
+    responses:
+      '200':
+        description: Device updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Device.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this device
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+  delete:
+    tags:
+      - Devices
+    summary: Delete device
+    description: Delete device. User must have access to the device.
+    responses:
+      '200':
+        description: Device deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: string
+                data:
+                  type: string
+                  example: Device deleted successfully
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this device
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+/devices/{id}/preview:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Device UUID
+
+  get:
+    tags:
+      - Devices
+    summary: Get device preview URL
+    description: |
+      Get a preview URL for the device that includes authentication credentials.
+      This URL can be used to preview the device display in a browser.
+      User must have access to the device.
+    responses:
+      '200':
+        description: Preview URL generated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    preview_url:
+                      type: string
+                      format: uri
+                      description: Full URL with device credentials for preview
+                      example: https://tv.dev.welcomesign.com/?id=550e8400-e29b-41d4-a716-446655440001&device_identifier=roku-serial-12345&device_token=a1b2c3d4...
+                    device_id:
+                      type: string
+                      format: uuid
+                      description: Device UUID
+                      example: 550e8400-e29b-41d4-a716-446655440001
+                    device_identifier:
+                      type: string
+                      description: Device hardware identifier
+                      example: roku-serial-12345
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this device
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Device not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'

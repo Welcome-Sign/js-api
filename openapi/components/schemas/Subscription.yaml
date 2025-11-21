@@ -1,0 +1,25 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  user_id:
+    type: string
+    format: uuid
+  stripe_subscription_id:
+    type: string
+  plan:
+    type: string
+    enum: [free, basic, pro, enterprise]
+  status:
+    type: string
+    enum: [active, cancelled, past_due, trialing]
+  current_period_end:
+    type: string
+    format: date-time
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time

@@ -1,0 +1,93 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  user_id:
+    type: string
+    format: uuid
+    description: Owner user ID
+  account_id:
+    type: string
+    format: uuid
+    nullable: true
+  name:
+    type: string
+    example: Sunset Beach Villa
+  address_line1:
+    type: string
+    example: 123 Ocean Drive
+    nullable: true
+  address_line2:
+    type: string
+    example: Apt 4B
+    nullable: true
+  city:
+    type: string
+    example: Miami
+    nullable: true
+  state:
+    type: string
+    example: FL
+    nullable: true
+  zip:
+    type: string
+    example: '33139'
+    nullable: true
+  bedrooms:
+    type: integer
+    description: Number of bedrooms
+    example: 3
+    nullable: true
+  bathrooms:
+    type: number
+    format: decimal
+    description: Number of bathrooms (e.g., 2.5)
+    example: 2.5
+    nullable: true
+  property_type:
+    type: string
+    enum: [house, townhouse, condo, apartment, villa, cottage, houseboat, other]
+    description: Type of property
+    example: villa
+    nullable: true
+  phone:
+    type: string
+    example: +1-555-123-4567
+    nullable: true
+  wifi_ssid:
+    type: string
+    example: SunsetVilla-Guest
+    nullable: true
+  wifi_password_encrypted:
+    type: string
+    description: Encrypted WiFi password
+    nullable: true
+  timezone:
+    type: string
+    example: America/New_York
+    nullable: true
+  default_checkin_time:
+    type: string
+    pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+    description: Default check-in time for bookings (HH:MM format, 24-hour)
+    example: '16:00'
+    nullable: true
+  default_checkout_time:
+    type: string
+    pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+    description: Default check-out time for bookings (HH:MM format, 24-hour)
+    example: '10:00'
+    nullable: true
+  default_theme:
+    type: string
+    enum: [default, dark, light, custom]
+    description: Default theme to apply to new devices registered to this property
+    example: default
+    default: default
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time

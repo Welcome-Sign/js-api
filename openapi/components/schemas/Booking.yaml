@@ -1,0 +1,41 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  property_id:
+    type: string
+    format: uuid
+  room_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: Room ID for room-specific booking (null for whole property)
+  pms_booking_id:
+    type: string
+  guest_name:
+    type: string
+  guest_email:
+    type: string
+    format: email
+  guest_phone:
+    type: string
+  check_in:
+    type: string
+    format: date-time
+  check_out:
+    type: string
+    format: date-time
+  num_guests:
+    type: integer
+  status:
+    type: string
+    enum: [confirmed, cancelled, completed, in_progress]
+  source:
+    type: string
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time

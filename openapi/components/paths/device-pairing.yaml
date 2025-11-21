@@ -1,0 +1,186 @@
+/pairing/code:
+  get:
+    tags:
+      - Device Pairing
+    summary: Generate device pairing code
+    description: |
+      Generate a pairing code for an unregistered device. This is a public endpoint
+      that devices use to obtain a code for registration without requiring authentication.
+      If the device already has an active pairing code, returns the existing code instead
+      of generating a new one. Codes are valid for 1 hour (3600 seconds).
+    security: []
+    parameters:
+      - name: device_identifier
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 5
+          maxLength: 255
+        description: Unique device identifier (serial number, MAC address, etc.)
+        example: roku-serial-12345
+    responses:
+      '200':
+        description: Pairing code generated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                      description: 6-character pairing code
+                      example: ABC123
+                    expires_at:
+                      type: integer
+                      description: Unix timestamp when code expires
+                      example: 1234567890
+                    ttl_seconds:
+                      type: integer
+                      description: Time to live in seconds
+                      example: 3600
+                    message:
+                      type: string
+                      example: Use this code to pair your device at https://api.example.com/pair
+      '400':
+        description: Invalid device_identifier
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: device_identifier must be between 5 and 255 characters
+      '500':
+        description: Failed to generate pairing code
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+/pairing/verify/{code}:
+  parameters:
+    - name: code
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Pairing code to verify
+      example: ABC123
+
+  get:
+    tags:
+      - Device Pairing
+    summary: Verify pairing code or pairing key
+    description: |
+      Verify if a code is valid. First checks Redis for temporary pairing codes,
+      then checks the devices table for a registered device's pairing_key.
+
+      This is a public endpoint used by devices to:
+      1. Check if their temporary pairing code is still valid (before registration)
+      2. Verify their pairing_key and get property details (after registration)
+    security: []
+    responses:
+      '200':
+        description: Code is valid
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                valid:
+                  type: boolean
+                  example: true
+                registered:
+                  type: boolean
+                  description: Whether this is a registered device (true) or temporary code (false)
+                device_identifier:
+                  type: string
+                  example: roku-serial-12345
+                device_id:
+                  type: string
+                  format: uuid
+                  description: Device UUID (only present if registered)
+                  example: 550e8400-e29b-41d4-a716-446655440001
+                device_token:
+                  type: string
+                  description: Device authentication token for API calls (only present if registered)
+                  example: a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd
+                property:
+                  type: object
+                  description: Property details (only present if registered)
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                    address:
+                      type: string
+                      nullable: true
+                    city:
+                      type: string
+                      nullable: true
+                    state:
+                      type: string
+                      nullable: true
+                    timezone:
+                      type: string
+                      nullable: true
+                created_at:
+                  type: integer
+                  description: Unix timestamp when code was created (only for temporary codes)
+                ttl_seconds:
+                  type: integer
+                  description: Remaining time to live in seconds (only for temporary codes)
+                expires_at:
+                  type: integer
+                  description: Unix timestamp when code expires (only for temporary codes)
+            examples:
+              temporary_code:
+                summary: Temporary pairing code (not yet registered)
+                value:
+                  valid: true
+                  registered: false
+                  device_identifier: roku-serial-12345
+                  created_at: 1234567890
+                  ttl_seconds: 3450
+                  expires_at: 1234571340
+              registered_device:
+                summary: Registered device with pairing key
+                value:
+                  valid: true
+                  registered: true
+                  device_id: 550e8400-e29b-41d4-a716-446655440001
+                  device_identifier: roku-serial-12345
+                  device_token: a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd
+                  property:
+                    id: 550e8400-e29b-41d4-a716-446655440000
+                    name: Beach House
+                    address: 123 Ocean Drive
+                    city: Miami
+                    state: FL
+                    timezone: America/New_York
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '404':
+        description: Invalid or expired pairing code
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Invalid or expired pairing code

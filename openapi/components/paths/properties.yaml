@@ -1,0 +1,252 @@
+/properties:
+  get:
+    tags:
+      - Properties
+    summary: List all properties
+    description: Get all properties accessible to authenticated user
+    parameters:
+      - name: account_id
+        in: query
+        schema:
+          type: string
+        description: Filter by account ID
+    responses:
+      '200':
+        description: List of properties
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Property.yaml'
+
+  post:
+    tags:
+      - Properties
+    summary: Create property
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                example: Sunset Beach Villa
+              address_line1:
+                type: string
+                example: 123 Ocean Drive
+                nullable: true
+              address_line2:
+                type: string
+                example: Apt 4B
+                nullable: true
+              city:
+                type: string
+                example: Miami
+                nullable: true
+              state:
+                type: string
+                example: FL
+                nullable: true
+              zip:
+                type: string
+                example: '33139'
+                nullable: true
+              bedrooms:
+                type: integer
+                example: 3
+                nullable: true
+              bathrooms:
+                type: number
+                format: decimal
+                example: 2.5
+                nullable: true
+              property_type:
+                type: string
+                enum: [house, townhouse, condo, apartment, villa, cottage, houseboat, other]
+                example: villa
+                nullable: true
+              phone:
+                type: string
+                example: +1-555-123-4567
+                nullable: true
+              wifi_ssid:
+                type: string
+                example: SunsetVilla-Guest
+                nullable: true
+              wifi_password:
+                type: string
+                example: Welcome2023
+                nullable: true
+              timezone:
+                type: string
+                example: America/New_York
+              default_checkin_time:
+                type: string
+                pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+                description: Default check-in time (HH:MM or HH:MM:SS)
+                example: '16:00:00'
+              default_checkout_time:
+                type: string
+                pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+                description: Default check-out time (HH:MM or HH:MM:SS)
+                example: '10:00:00'
+              default_theme:
+                type: string
+                enum: [default, dark, light, custom]
+                description: Default theme for new devices
+                example: default
+    responses:
+      '201':
+        description: Property created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Property.yaml'
+      '400':
+        description: Missing required field
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Property name is required
+      '403':
+        description: Subscription limit reached
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: "You have reached the maximum properties for your plan (limit: 5). Please upgrade your subscription."
+
+/properties/{id}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Properties
+    summary: Get property details
+    responses:
+      '200':
+        description: Property details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Property.yaml'
+      '404':
+        $ref: '../responses/common.yaml#/NotFound'
+
+  put:
+    tags:
+      - Properties
+    summary: Update property
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              address_line1:
+                type: string
+                nullable: true
+              address_line2:
+                type: string
+                nullable: true
+              city:
+                type: string
+                nullable: true
+              state:
+                type: string
+                nullable: true
+              zip:
+                type: string
+                nullable: true
+              bedrooms:
+                type: integer
+                nullable: true
+              bathrooms:
+                type: number
+                format: decimal
+                nullable: true
+              property_type:
+                type: string
+                enum: [house, townhouse, condo, apartment, villa, cottage, houseboat, other]
+                nullable: true
+              phone:
+                type: string
+                nullable: true
+              wifi_ssid:
+                type: string
+                nullable: true
+              wifi_password:
+                type: string
+                nullable: true
+              timezone:
+                type: string
+              default_checkin_time:
+                type: string
+                pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+                description: Default check-in time (HH:MM or HH:MM:SS)
+              default_checkout_time:
+                type: string
+                pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$'
+                description: Default check-out time (HH:MM or HH:MM:SS)
+              default_theme:
+                type: string
+                enum: [default, dark, light, custom]
+                description: Default theme for new devices
+    responses:
+      '200':
+        description: Property updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Property.yaml'
+
+  delete:
+    tags:
+      - Properties
+    summary: Delete property
+    responses:
+      '200':
+        description: Property deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string

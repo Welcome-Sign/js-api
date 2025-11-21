@@ -1,0 +1,20 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  property_id:
+    type: string
+    format: uuid
+  pms_type:
+    type: string
+  is_connected:
+    type: boolean
+  auto_sync:
+    type: boolean
+  last_sync_at:
+    type: string
+    format: date-time
+  created_at:
+    type: string
+    format: date-time

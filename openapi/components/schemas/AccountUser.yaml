@@ -1,0 +1,29 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  user_id:
+    type: string
+    format: uuid
+  account_id:
+    type: string
+    format: uuid
+  email:
+    type: string
+    format: email
+  firstname:
+    type: string
+  lastname:
+    type: string
+  role:
+    type: string
+    enum: [owner, admin, member, viewer]
+  properties:
+    type: array
+    items:
+      type: string
+    description: Property IDs user can access
+  created_at:
+    type: string
+    format: date-time

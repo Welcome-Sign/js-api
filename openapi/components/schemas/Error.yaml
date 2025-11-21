@@ -1,0 +1,9 @@
+type: object
+properties:
+  error:
+    type: boolean
+    example: true
+  message:
+    type: string
+  details:
+    type: object

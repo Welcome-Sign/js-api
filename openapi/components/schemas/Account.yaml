@@ -1,0 +1,81 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Account UUID
+  user_id:
+    type: string
+    format: uuid
+    description: Owner user ID
+  name:
+    type: string
+    description: Business or organization name
+    example: Sunset Rentals LLC
+  address_line1:
+    type: string
+    example: 123 Main Street
+    nullable: true
+  address_line2:
+    type: string
+    example: Suite 100
+    nullable: true
+  city:
+    type: string
+    example: Miami
+    nullable: true
+  state:
+    type: string
+    example: FL
+    nullable: true
+  zip:
+    type: string
+    example: '33139'
+    nullable: true
+  phone:
+    type: string
+    example: +1-555-123-4567
+    nullable: true
+  email:
+    type: string
+    format: email
+    example: contact@sunsetrentals.com
+    nullable: true
+  max_properties:
+    type: integer
+    description: Maximum number of properties allowed
+    nullable: true
+  max_devices:
+    type: integer
+    description: Maximum number of devices allowed
+    nullable: true
+  max_users:
+    type: integer
+    description: Maximum number of users allowed
+    nullable: true
+  subscription_tier:
+    type: string
+    description: Subscription tier or plan
+    nullable: true
+  onboarded:
+    type: integer
+    description: |
+      Onboarding status: 0 = not onboarded (no properties created yet), 1 = onboarded (has created at least one property).
+      This field is automatically set to 1 by database trigger when the first property is created.
+      Read-only field that cannot be manually modified.
+    example: 1
+    enum: [0, 1]
+  num_properties:
+    type: string
+    enum: ['1', '2-5', '6-10', '11-25', '26-50', '50+']
+    description: Number of properties the account manages
+    example: '2-5'
+    nullable: true
+  date_created:
+    type: string
+    format: date-time
+    description: When the account was created
+  updated_at:
+    type: string
+    format: date-time
+    description: When the account was last updated

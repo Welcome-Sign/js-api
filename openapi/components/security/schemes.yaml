@@ -1,0 +1,10 @@
+BearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: JWT token obtained from /auth/login
+
+DeviceAuth:
+  type: http
+  scheme: bearer
+  description: Device token obtained from /devices/register. Used by devices for self-authentication.

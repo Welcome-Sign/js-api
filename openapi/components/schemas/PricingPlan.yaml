@@ -1,0 +1,157 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Unique plan identifier
+    example: pro
+    enum: [free, basic, pro, enterprise, lifetime_founder]
+  name:
+    type: string
+    description: Plan display name
+    example: Pro
+  description:
+    type: string
+    description: Plan description
+    example: Advanced features for growing businesses
+  tagline:
+    type: string
+    description: Marketing tagline
+    example: Most popular for property managers
+  price_monthly:
+    type: number
+    nullable: true
+    description: Monthly price in USD (null for lifetime plans)
+    example: 99.00
+  price_annual:
+    type: number
+    nullable: true
+    description: Annual price in USD (null for lifetime plans)
+    example: 950.00
+  price_lifetime:
+    type: number
+    nullable: true
+    description: One-time lifetime price in USD (null for recurring plans)
+    example: 799.00
+  trial_days:
+    type: integer
+    description: Number of trial days included
+    example: 14
+  limits:
+    type: object
+    description: Resource limits for this plan
+    properties:
+      properties:
+        type: integer
+        description: Maximum number of properties (-1 = unlimited)
+        example: 25
+      devices:
+        type: integer
+        description: Maximum number of devices per property (-1 = unlimited)
+        example: -1
+      content:
+        type: integer
+        description: Maximum number of content items (-1 = unlimited)
+        example: 100
+      recommendations:
+        type: integer
+        description: Maximum number of recommendations per category (-1 = unlimited)
+        example: 100
+  features:
+    type: object
+    description: Feature availability flags
+    properties:
+      basic_welcome_screen:
+        type: boolean
+        example: true
+      wifi_info_display:
+        type: boolean
+        example: true
+      rooms:
+        type: boolean
+        description: Multi-room support for hotels
+        example: true
+      analytics:
+        type: boolean
+        description: Analytics dashboard access
+        example: true
+      integrations:
+        type: boolean
+        description: PMS integrations enabled
+        example: true
+      content_scheduling:
+        type: boolean
+        description: Time-based content scheduling
+        example: true
+      api_access:
+        type: boolean
+        description: REST API access for third parties
+        example: false
+      white_label:
+        type: boolean
+        description: Remove WelcomeSign branding
+        example: false
+      founder_badge:
+        type: boolean
+        description: Special founder badge (lifetime_founder only)
+        example: false
+      founder_priority_support:
+        type: boolean
+        description: Priority support queue (lifetime_founder only)
+        example: false
+      founder_feature_voting:
+        type: boolean
+        description: Vote on product roadmap (lifetime_founder only)
+        example: false
+  display:
+    type: object
+    description: Display metadata for frontend
+    properties:
+      popular:
+        type: boolean
+        description: Mark as "Most Popular"
+        example: true
+      recommended:
+        type: boolean
+        description: Mark as "Recommended"
+        example: true
+      visible:
+        type: boolean
+        description: Whether plan is visible in listings
+        example: true
+      sort_order:
+        type: integer
+        description: Display order (lower = first)
+        example: 3
+      badge:
+        type: string
+        nullable: true
+        description: Optional badge text (e.g., "Limited Time")
+        example: null
+      badge_color:
+        type: string
+        nullable: true
+        description: Badge color (e.g., "gold", "red")
+        example: null
+  availability:
+    type: object
+    nullable: true
+    description: Availability constraints (for limited plans like lifetime_founder)
+    properties:
+      max_purchases:
+        type: integer
+        nullable: true
+        description: Maximum number of purchases allowed
+        example: 200
+      available_until:
+        type: string
+        format: date
+        nullable: true
+        description: Date when offer expires
+        example: "2025-03-15"
+required:
+  - id
+  - name
+  - description
+  - limits
+  - features
+  - display

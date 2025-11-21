@@ -1,0 +1,25 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  account_id:
+    type: string
+    format: uuid
+  email:
+    type: string
+    format: email
+  role:
+    type: string
+    enum: [owner, admin, member, viewer]
+  token:
+    type: string
+  status:
+    type: string
+    enum: [pending, accepted, declined, expired]
+  expires_at:
+    type: string
+    format: date-time
+  created_at:
+    type: string
+    format: date-time

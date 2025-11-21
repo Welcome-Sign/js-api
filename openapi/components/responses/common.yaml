@@ -1,0 +1,46 @@
+BadRequest:
+  description: Bad request
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/Error.yaml'
+
+Unauthorized:
+  description: Unauthorized
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/Error.yaml'
+      example:
+        error: true
+        message: Unauthorized
+
+Forbidden:
+  description: Forbidden
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/Error.yaml'
+      example:
+        error: true
+        message: Forbidden
+
+NotFound:
+  description: Resource not found
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/Error.yaml'
+      example:
+        error: true
+        message: Resource not found
+
+InternalServerError:
+  description: Internal server error
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/Error.yaml'
+      example:
+        error: true
+        message: Internal server error

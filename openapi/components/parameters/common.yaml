@@ -1,0 +1,26 @@
+PropertyId:
+  name: property_id
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+  description: Property UUID
+
+DeviceId:
+  name: device_id
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+  description: Device UUID
+
+AccountId:
+  name: account_id
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+  description: Account UUID

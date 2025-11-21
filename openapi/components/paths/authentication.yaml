@@ -1,0 +1,332 @@
+/auth/register:
+  post:
+    tags:
+      - Authentication
+    summary: Register new user account
+    description: Create a new user account with email and password. Returns JWT token and refresh token stored in Redis.
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                format: email
+                example: user@example.com
+              password:
+                type: string
+                format: password
+                minLength: 8
+                example: SecurePass123!
+              firstname:
+                type: string
+                example: John
+              lastname:
+                type: string
+                example: Doe
+              phone:
+                type: string
+                example: +1-555-123-4567
+    responses:
+      '201':
+        description: User successfully registered
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 201
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                      example: true
+                    data:
+                      $ref: '../schemas/User.yaml'
+                    token:
+                      type: string
+                      description: JWT authentication token
+                    refresh_token:
+                      type: string
+                      description: JWT refresh token
+                    expires_at:
+                      type: integer
+                      description: Unix timestamp when token expires
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '409':
+        description: Email already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+/auth/login:
+  post:
+    tags:
+      - Authentication
+    summary: Login user
+    description: Authenticate user and receive JWT token. Tokens are stored in Redis with request metadata (IP, user agent).
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                format: password
+    responses:
+      '200':
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    token:
+                      type: string
+                      description: JWT authentication token
+                    refresh_token:
+                      type: string
+                      description: JWT refresh token
+                    expires_at:
+                      type: integer
+                      description: Unix timestamp when token expires
+                    user:
+                      $ref: '../schemas/User.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/auth/logout:
+  post:
+    tags:
+      - Authentication
+    summary: Logout user
+    description: Invalidate current authentication token
+    responses:
+      '200':
+        description: Logout successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+
+/auth/refresh:
+  post:
+    tags:
+      - Authentication
+    summary: Refresh authentication token
+    description: Get new JWT token using refresh token. Old tokens are revoked and new tokens are generated.
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - refresh_token
+            properties:
+              refresh_token:
+                type: string
+    responses:
+      '200':
+        description: Token refreshed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    token:
+                      type: string
+                    refresh_token:
+                      type: string
+                    expires_at:
+                      type: integer
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/auth/sessions:
+  get:
+    tags:
+      - Authentication
+    summary: Get all active sessions
+    description: List all active sessions/tokens for the authenticated user
+    responses:
+      '200':
+        description: List of active sessions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    data:
+                      type: array
+                      items:
+                        $ref: '../schemas/Session.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  delete:
+    tags:
+      - Authentication
+    summary: Revoke all sessions
+    description: Revoke all active sessions/tokens for the authenticated user (except current one)
+    responses:
+      '200':
+        description: All sessions revoked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: object
+                  properties:
+                    success:
+                      type: boolean
+                    message:
+                      type: string
+                      example: "Revoked 3 session(s)"
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/auth/forgot-password:
+  post:
+    tags:
+      - Authentication
+    summary: Request password reset
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+            properties:
+              email:
+                type: string
+                format: email
+    responses:
+      '200':
+        description: Password reset email sent
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+
+/auth/reset-password:
+  post:
+    tags:
+      - Authentication
+    summary: Reset password
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - token
+              - password
+            properties:
+              token:
+                type: string
+                description: Reset token from email
+              password:
+                type: string
+                format: password
+                minLength: 8
+    responses:
+      '200':
+        description: Password reset successful
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'

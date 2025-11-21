@@ -1,0 +1,35 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Room UUID
+    example: 550e8400-e29b-41d4-a716-446655440002
+  property_id:
+    type: string
+    format: uuid
+    description: Property UUID this room belongs to
+    example: 550e8400-e29b-41d4-a716-446655440000
+  name:
+    type: string
+    description: Room name (e.g., "Living Room", "Master Bedroom")
+    example: Living Room
+  description:
+    type: string
+    nullable: true
+    description: Optional description of the room
+    example: Main living area with 65" TV
+  created_at:
+    type: string
+    format: date-time
+    description: When room was created
+    example: '2025-01-15 10:00:00'
+  updated_at:
+    type: string
+    format: date-time
+    description: When room was last updated
+    example: '2025-01-15 10:30:00'
+required:
+  - id
+  - property_id
+  - name

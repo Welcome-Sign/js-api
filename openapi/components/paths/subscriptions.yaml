@@ -1,0 +1,737 @@
+/subscriptions:
+  get:
+    tags:
+      - Subscriptions
+    summary: Get user subscription with limits and usage
+    description: |
+      Get current user's subscription details including tier, resource limits, enabled features, and current usage.
+      This endpoint combines subscription information with SiteLicense limits for easy frontend integration.
+    responses:
+      '200':
+        description: Subscription details with limits and usage
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  type: object
+                  properties:
+                    tier:
+                      type: string
+                      enum: [free, basic, pro, enterprise, lifetime_founder]
+                      example: pro
+                      description: Current subscription tier
+                    is_lifetime:
+                      type: boolean
+                      example: false
+                      description: Is this a lifetime subscription
+                    limits:
+                      type: object
+                      properties:
+                        properties:
+                          type: integer
+                          example: 25
+                          description: Maximum properties allowed (-1 = unlimited)
+                        devices:
+                          type: integer
+                          example: -1
+                          description: Maximum devices per property (-1 = unlimited)
+                        content:
+                          type: integer
+                          example: 100
+                          description: Maximum content items (-1 = unlimited)
+                        recommendations:
+                          type: integer
+                          example: 100
+                          description: Maximum recommendations per category (-1 = unlimited)
+                    features:
+                      type: object
+                      properties:
+                        rooms:
+                          type: boolean
+                          example: true
+                          description: Multi-room support for hotels
+                        analytics:
+                          type: boolean
+                          example: true
+                          description: Analytics dashboard access
+                        integrations:
+                          type: boolean
+                          example: true
+                          description: External API integrations (weather, events, PMS)
+                        content_schedule:
+                          type: boolean
+                          example: true
+                          description: Time-based content scheduling
+                        white_label:
+                          type: boolean
+                          example: false
+                          description: White label branding (Enterprise only)
+                        api_access:
+                          type: boolean
+                          example: false
+                          description: REST API access for third parties (Enterprise only)
+                        founder_badge:
+                          type: boolean
+                          example: false
+                          description: Founder badge display (Lifetime Founder only)
+                        founder_priority_support:
+                          type: boolean
+                          example: false
+                          description: Priority support queue access (Lifetime Founder only)
+                        founder_feature_voting:
+                          type: boolean
+                          example: false
+                          description: Product roadmap voting rights (Lifetime Founder only)
+                    usage:
+                      type: object
+                      properties:
+                        properties:
+                          type: integer
+                          example: 3
+                          description: Current number of properties
+                        devices:
+                          type: integer
+                          example: 12
+                          description: Total devices across all properties
+                        content:
+                          type: integer
+                          example: 15
+                          description: Total content items created
+                    subscription_id:
+                      type: string
+                      nullable: true
+                      description: Payment provider subscription ID if using paid plan
+                      example: sub_1234567890
+                    status:
+                      type: string
+                      enum: [active, cancelled, past_due, trialing]
+                      example: active
+                      description: Subscription status (if using paid plan)
+                    current_period_end:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      description: Current billing period end date
+                      example: '2025-02-13T10:30:00Z'
+                    trial_end:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      description: Trial period end date (only present if trial active)
+                      example: '2025-01-27T10:30:00Z'
+                    on_trial:
+                      type: boolean
+                      description: Whether subscription is currently in trial period
+                      example: true
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account not found. Please complete onboarding.
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+
+/subscriptions/subscribe:
+  post:
+    tags:
+      - Subscriptions
+    summary: Subscribe to a paid plan
+    description: |
+      Create a new subscription for the authenticated user. User must have completed onboarding.
+      Accepts a payment token from frontend (Stripe Elements) and creates both customer and subscription.
+      Frontend never sees payment provider branding - completely white-labeled.
+
+      **Trial Periods:**
+      - Basic plan: 14-day trial
+      - Pro plan: 14-day trial
+      - Enterprise plan: 30-day trial
+      - Trial periods are automatically applied from pricing configuration
+      - No charge until trial ends
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - plan
+              - payment_token
+            properties:
+              plan:
+                type: string
+                enum: [basic, pro, enterprise]
+                description: Subscription plan tier
+                example: pro
+              payment_token:
+                type: string
+                description: Payment method token from Stripe Elements (pm_xxx)
+                example: pm_1234567890abcdef
+    responses:
+      '201':
+        description: Subscription created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Subscription created successfully
+                subscription:
+                  type: object
+                  properties:
+                    plan:
+                      type: string
+                      example: pro
+                    status:
+                      type: string
+                      enum: [active, trialing, incomplete]
+                      example: trialing
+                      description: Subscription status (trialing if trial period active)
+                    current_period_end:
+                      type: string
+                      format: date-time
+                      example: '2025-02-13T10:30:00Z'
+                    trial_end:
+                      type: string
+                      format: date-time
+                      example: '2025-01-27T10:30:00Z'
+                      description: Trial period end date (only present if trial is active)
+                    on_trial:
+                      type: boolean
+                      example: true
+                      description: Whether subscription is currently in trial period
+      '400':
+        description: Invalid request (missing fields, invalid plan)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              missing_plan:
+                value:
+                  error: true
+                  message: 'Plan is required (basic, pro, enterprise)'
+              missing_token:
+                value:
+                  error: true
+                  message: 'Payment token is required'
+              invalid_plan:
+                value:
+                  error: true
+                  message: 'Invalid plan. Must be: basic, pro, or enterprise'
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account not found. Please complete onboarding.
+      '500':
+        description: Failed to create subscription
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/subscriptions/cancel:
+  post:
+    tags:
+      - Subscriptions
+    summary: Cancel subscription
+    description: |
+      Cancel the user's active subscription. Can cancel immediately or at the end of the billing period.
+      Default behavior is to cancel at period end to allow user to retain access.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              immediate:
+                type: boolean
+                default: false
+                description: If true, cancel immediately; if false, cancel at period end
+    responses:
+      '200':
+        description: Subscription cancelled
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Subscription will cancel at end of billing period
+                cancel_at_period_end:
+                  type: boolean
+                  example: true
+                access_until:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  example: '2025-02-13T10:30:00Z'
+      '400':
+        description: No active subscription to cancel
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: No active subscription to cancel
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/subscriptions/reactivate:
+  post:
+    tags:
+      - Subscriptions
+    summary: Reactivate subscription
+    description: |
+      Reactivate a subscription that was scheduled to cancel at period end.
+      Only works if subscription is still active but marked for cancellation.
+    responses:
+      '200':
+        description: Subscription reactivated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Subscription reactivated successfully
+      '400':
+        description: Subscription is not scheduled to cancel or not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              no_subscription:
+                value:
+                  error: true
+                  message: No subscription found
+              not_scheduled:
+                value:
+                  error: true
+                  message: Subscription is not scheduled to cancel
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/subscriptions/lifetime:
+  post:
+    tags:
+      - Subscriptions
+    summary: Purchase Lifetime Founder plan (one-time payment)
+    description: |
+      Purchase the exclusive Lifetime Founder plan with a one-time payment of $799.
+
+      **Limited Availability:** Only available to first 200-300 customers during launch period.
+
+      **Includes:**
+      - Up to 15 properties
+      - Unlimited devices
+      - 50 content items
+      - All Pro features (multi-room, analytics, scheduling, integrations)
+      - Founder badge and priority support
+      - Feature voting rights
+
+      **Restrictions:**
+      - Cannot purchase if already have lifetime subscription
+      - Must cancel existing recurring subscription first
+      - One-time payment (not refundable)
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - payment_token
+            properties:
+              payment_token:
+                type: string
+                description: Payment method token from Stripe Elements (pm_xxx)
+                example: pm_1234567890abcdef
+    responses:
+      '201':
+        description: Lifetime subscription purchased successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Lifetime Founder plan purchased successfully! Welcome to the founding members.
+                subscription:
+                  type: object
+                  properties:
+                    plan:
+                      type: string
+                      example: lifetime_founder
+                    is_lifetime:
+                      type: boolean
+                      example: true
+                    status:
+                      type: string
+                      example: active
+                    purchased_at:
+                      type: string
+                      format: date-time
+                      example: '2025-01-13T10:30:00Z'
+                    features:
+                      type: object
+                      properties:
+                        properties:
+                          type: integer
+                          example: 15
+                        devices:
+                          type: string
+                          example: unlimited
+                        content:
+                          type: integer
+                          example: 50
+                        founder_badge:
+                          type: boolean
+                          example: true
+                        priority_support:
+                          type: boolean
+                          example: true
+      '400':
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              already_lifetime:
+                value:
+                  error: true
+                  message: You already have a lifetime subscription
+              has_subscription:
+                value:
+                  error: true
+                  message: Please cancel your current subscription before purchasing lifetime plan
+              missing_token:
+                value:
+                  error: true
+                  message: Payment token is required
+              payment_failed:
+                value:
+                  error: true
+                  message: 'Payment failed: card declined'
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account not found. Please complete onboarding.
+      '500':
+        description: Failed to process payment
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/subscriptions/payment-method:
+  put:
+    tags:
+      - Subscriptions
+    summary: Update payment method
+    description: |
+      Update the payment method for the user's subscription.
+      Accepts a payment token from frontend and updates the default payment method in Stripe.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - payment_token
+            properties:
+              payment_token:
+                type: string
+                description: Payment method token from Stripe Elements (pm_xxx)
+                example: pm_9876543210fedcba
+    responses:
+      '200':
+        description: Payment method updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Payment method updated successfully
+                payment_method:
+                  type: object
+                  properties:
+                    last4:
+                      type: string
+                      example: '4242'
+                    brand:
+                      type: string
+                      example: visa
+      '400':
+        description: Missing payment token or no payment customer found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              missing_token:
+                value:
+                  error: true
+                  message: Payment token is required
+              no_customer:
+                value:
+                  error: true
+                  message: No payment customer found
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/subscriptions/plan:
+  put:
+    tags:
+      - Subscriptions
+    summary: Change subscription plan
+    description: |
+      Upgrade or downgrade the subscription plan. Changes are prorated automatically.
+      Cannot change to the same plan.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - new_plan
+            properties:
+              new_plan:
+                type: string
+                enum: [basic, pro, enterprise]
+                description: New subscription plan tier
+                example: enterprise
+    responses:
+      '200':
+        description: Plan changed successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Plan changed successfully
+                subscription:
+                  type: object
+                  properties:
+                    plan:
+                      type: string
+                      example: enterprise
+                    status:
+                      type: string
+                      example: active
+      '400':
+        description: Invalid request (missing plan, same plan, invalid plan)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              missing_plan:
+                value:
+                  error: true
+                  message: 'New plan is required (basic, pro, enterprise)'
+              same_plan:
+                value:
+                  error: true
+                  message: 'You are already on the pro plan'
+              no_subscription:
+                value:
+                  error: true
+                  message: No active subscription found
+              invalid_plan:
+                value:
+                  error: true
+                  message: 'Invalid plan. Must be: basic, pro, or enterprise'
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/billing/invoices:
+  get:
+    tags:
+      - Subscriptions
+    summary: List invoices
+    responses:
+      '200':
+        description: List of invoices
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Invoice.yaml'
+
+/billing/payment-methods:
+  get:
+    tags:
+      - Subscriptions
+    summary: List payment methods
+    responses:
+      '200':
+        description: List of payment methods
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/PaymentMethod.yaml'
+
+  post:
+    tags:
+      - Subscriptions
+    summary: Add payment method
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - payment_method_id
+            properties:
+              payment_method_id:
+                type: string
+                description: Stripe payment method ID
+              set_as_default:
+                type: boolean
+    responses:
+      '201':
+        description: Payment method added
+
+/billing/payment-methods/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  delete:
+    tags:
+      - Subscriptions
+    summary: Remove payment method
+    responses:
+      '200':
+        description: Payment method removed
+
+/billing/portal:
+  post:
+    tags:
+      - Subscriptions
+    summary: Get Stripe customer portal URL
+    description: Generate link to Stripe customer portal for managing subscription
+    responses:
+      '200':
+        description: Portal URL generated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                url:
+                  type: string
+                  format: uri

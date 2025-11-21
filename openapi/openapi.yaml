@@ -1,0 +1,293 @@
+openapi: 3.0.3
+
+info:
+  title: WelcomeSign API
+  description: |
+    REST API for WelcomeSign - A digital signage platform for vacation rentals and hospitality properties.
+
+    Features:
+    - Multi-user account management
+    - Property management with multiple properties per account
+    - Device/TV screen management with multiple screens per property
+    - Booking integration and management
+    - Content delivery and management
+    - Subscription and billing management
+  version: 1.0.0
+  contact:
+    name: WelcomeSign API Support
+    url: https://welcomesign.com/support
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.welcomesign.com/v1
+    description: Production server
+  - url: https://staging-api.welcomesign.com/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User profile and account management
+  - name: Accounts
+    description: Account and multi-user management
+  - name: Properties
+    description: Property management
+  - name: Rooms
+    description: Room management within properties (Pro/Enterprise only)
+  - name: Device Pairing
+    description: Device pairing code generation and verification (public endpoints)
+  - name: Devices
+    description: TV/screen device management (user-authenticated)
+  - name: Device API
+    description: Device-initiated endpoints (device token authenticated)
+  - name: Bookings
+    description: Guest booking management
+  - name: Content
+    description: Content and media management
+  - name: Subscriptions
+    description: Subscription and billing management
+  - name: Pricing
+    description: Public pricing and plan information (no authentication required)
+  - name: Webhooks
+    description: Webhook endpoints for payment provider callbacks (public, signature-verified)
+  - name: Analytics
+    description: Usage analytics and reporting
+  - name: Integrations
+    description: PMS and third-party integrations
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication
+  /auth/register:
+    $ref: './components/paths/authentication.yaml#/~1auth~1register'
+  /auth/login:
+    $ref: './components/paths/authentication.yaml#/~1auth~1login'
+  /auth/logout:
+    $ref: './components/paths/authentication.yaml#/~1auth~1logout'
+  /auth/refresh:
+    $ref: './components/paths/authentication.yaml#/~1auth~1refresh'
+  /auth/sessions:
+    $ref: './components/paths/authentication.yaml#/~1auth~1sessions'
+  /auth/forgot-password:
+    $ref: './components/paths/authentication.yaml#/~1auth~1forgot-password'
+  /auth/reset-password:
+    $ref: './components/paths/authentication.yaml#/~1auth~1reset-password'
+
+  # Device Pairing
+  /pairing/code:
+    $ref: './components/paths/device-pairing.yaml#/~1pairing~1code'
+  /pairing/verify/{code}:
+    $ref: './components/paths/device-pairing.yaml#/~1pairing~1verify~1{code}'
+
+  # Users
+  /users/me:
+    $ref: './components/paths/users.yaml#/~1users~1me'
+  /users/me/password:
+    $ref: './components/paths/users.yaml#/~1users~1me~1password'
+  /users/me/settings:
+    $ref: './components/paths/users.yaml#/~1users~1me~1settings'
+
+  # Accounts
+  /accounts:
+    $ref: './components/paths/accounts.yaml#/~1accounts'
+  /accounts/me:
+    $ref: './components/paths/accounts.yaml#/~1accounts~1me'
+  /accounts/{id}:
+    $ref: './components/paths/accounts.yaml#/~1accounts~1{id}'
+  /accounts/{account_id}/users:
+    $ref: './components/paths/accounts.yaml#/~1accounts~1{account_id}~1users'
+  /accounts/{account_id}/users/{user_id}:
+    $ref: './components/paths/accounts.yaml#/~1accounts~1{account_id}~1users~1{user_id}'
+  /invitations:
+    $ref: './components/paths/accounts.yaml#/~1invitations'
+  /invitations/{token}/accept:
+    $ref: './components/paths/accounts.yaml#/~1invitations~1{token}~1accept'
+  /invitations/{token}/decline:
+    $ref: './components/paths/accounts.yaml#/~1invitations~1{token}~1decline'
+
+  # Properties
+  /properties:
+    $ref: './components/paths/properties.yaml#/~1properties'
+  /properties/{id}:
+    $ref: './components/paths/properties.yaml#/~1properties~1{id}'
+
+  # Rooms
+  /properties/{property_id}/rooms:
+    $ref: './components/paths/rooms.yaml#/~1properties~1{property_id}~1rooms'
+  /rooms/{id}:
+    $ref: './components/paths/rooms.yaml#/~1rooms~1{id}'
+
+  # Devices
+  /properties/{property_id}/devices:
+    $ref: './components/paths/devices.yaml#/~1properties~1{property_id}~1devices'
+  /properties/{property_id}/devices/{device_id}:
+    $ref: './components/paths/devices.yaml#/~1properties~1{property_id}~1devices~1{device_id}'
+  /properties/{property_id}/devices/{device_id}/ping:
+    $ref: './components/paths/devices.yaml#/~1properties~1{property_id}~1devices~1{device_id}~1ping'
+  /properties/{property_id}/devices/{device_id}/restart:
+    $ref: './components/paths/devices.yaml#/~1properties~1{property_id}~1devices~1{device_id}~1restart'
+  /devices/register:
+    $ref: './components/paths/devices.yaml#/~1devices~1register'
+  /devices:
+    $ref: './components/paths/devices.yaml#/~1devices'
+  /devices/{id}:
+    $ref: './components/paths/devices.yaml#/~1devices~1{id}'
+  /devices/{id}/preview:
+    $ref: './components/paths/devices.yaml#/~1devices~1{id}~1preview'
+
+  # Device API
+  /device/content:
+    $ref: './components/paths/device-api.yaml#/~1device~1content'
+  /device/heartbeat:
+    $ref: './components/paths/device-api.yaml#/~1device~1heartbeat'
+  /device/info:
+    $ref: './components/paths/device-api.yaml#/~1device~1info'
+
+  # Bookings
+  /properties/{property_id}/bookings:
+    $ref: './components/paths/bookings.yaml#/~1properties~1{property_id}~1bookings'
+  /properties/{property_id}/bookings/{id}:
+    $ref: './components/paths/bookings.yaml#/~1properties~1{property_id}~1bookings~1{id}'
+  /properties/{property_id}/bookings/current:
+    $ref: './components/paths/bookings.yaml#/~1properties~1{property_id}~1bookings~1current'
+  /bookings:
+    $ref: './components/paths/bookings.yaml#/~1bookings'
+  /bookings/upcoming:
+    $ref: './components/paths/bookings.yaml#/~1bookings~1upcoming'
+
+  # Content
+  /content:
+    $ref: './components/paths/content.yaml#/~1content'
+  /content/{id}:
+    $ref: './components/paths/content.yaml#/~1content~1{id}'
+  /properties/{property_id}/content:
+    $ref: './components/paths/content.yaml#/~1properties~1{property_id}~1content'
+  /properties/{property_id}/content/{type}:
+    $ref: './components/paths/content.yaml#/~1properties~1{property_id}~1content~1{type}'
+
+  # Pricing (public)
+  /pricing/plans:
+    $ref: './components/paths/pricing.yaml#/~1pricing~1plans'
+  /pricing/plans/{id}:
+    $ref: './components/paths/pricing.yaml#/~1pricing~1plans~1{id}'
+  /pricing/compare:
+    $ref: './components/paths/pricing.yaml#/~1pricing~1compare'
+  /pricing/availability/lifetime:
+    $ref: './components/paths/pricing.yaml#/~1pricing~1availability~1lifetime'
+
+  # Subscriptions
+  /subscriptions:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions'
+  /subscriptions/subscribe:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1subscribe'
+  /subscriptions/cancel:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1cancel'
+  /subscriptions/reactivate:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1reactivate'
+  /subscriptions/lifetime:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1lifetime'
+  /subscriptions/payment-method:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1payment-method'
+  /subscriptions/plan:
+    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1plan'
+  /billing/invoices:
+    $ref: './components/paths/subscriptions.yaml#/~1billing~1invoices'
+  /billing/payment-methods:
+    $ref: './components/paths/subscriptions.yaml#/~1billing~1payment-methods'
+  /billing/payment-methods/{id}:
+    $ref: './components/paths/subscriptions.yaml#/~1billing~1payment-methods~1{id}'
+  /billing/portal:
+    $ref: './components/paths/subscriptions.yaml#/~1billing~1portal'
+
+  # Webhooks
+  /webhooks/stripe:
+    $ref: './components/paths/webhooks.yaml#/~1webhooks~1stripe'
+
+  # Analytics
+  /analytics/properties/{property_id}:
+    $ref: './components/paths/analytics.yaml#/~1analytics~1properties~1{property_id}'
+  /analytics/devices/{device_id}:
+    $ref: './components/paths/analytics.yaml#/~1analytics~1devices~1{device_id}'
+  /analytics/events:
+    $ref: './components/paths/analytics.yaml#/~1analytics~1events'
+
+  # Integrations
+  /integrations:
+    $ref: './components/paths/integrations.yaml#/~1integrations'
+  /integrations/{property_id}:
+    $ref: './components/paths/integrations.yaml#/~1integrations~1{property_id}'
+  /integrations/{property_id}/{pms_type}:
+    $ref: './components/paths/integrations.yaml#/~1integrations~1{property_id}~1{pms_type}'
+  /integrations/{property_id}/{pms_type}/sync:
+    $ref: './components/paths/integrations.yaml#/~1integrations~1{property_id}~1{pms_type}~1sync'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      $ref: './components/security/schemes.yaml#/BearerAuth'
+    DeviceAuth:
+      $ref: './components/security/schemes.yaml#/DeviceAuth'
+
+  parameters:
+    PropertyId:
+      $ref: './components/parameters/common.yaml#/PropertyId'
+    DeviceId:
+      $ref: './components/parameters/common.yaml#/DeviceId'
+    AccountId:
+      $ref: './components/parameters/common.yaml#/AccountId'
+
+  schemas:
+    User:
+      $ref: './components/schemas/User.yaml'
+    Account:
+      $ref: './components/schemas/Account.yaml'
+    Session:
+      $ref: './components/schemas/Session.yaml'
+    UserSettings:
+      $ref: './components/schemas/UserSettings.yaml'
+    AccountUser:
+      $ref: './components/schemas/AccountUser.yaml'
+    Invitation:
+      $ref: './components/schemas/Invitation.yaml'
+    Property:
+      $ref: './components/schemas/Property.yaml'
+    Room:
+      $ref: './components/schemas/Room.yaml'
+    Device:
+      $ref: './components/schemas/Device.yaml'
+    Booking:
+      $ref: './components/schemas/Booking.yaml'
+    Content:
+      $ref: './components/schemas/Content.yaml'
+    Subscription:
+      $ref: './components/schemas/Subscription.yaml'
+    PricingPlan:
+      $ref: './components/schemas/PricingPlan.yaml'
+    Invoice:
+      $ref: './components/schemas/Invoice.yaml'
+    PaymentMethod:
+      $ref: './components/schemas/PaymentMethod.yaml'
+    Analytics:
+      $ref: './components/schemas/Analytics.yaml'
+    Integration:
+      $ref: './components/schemas/Integration.yaml'
+    Error:
+      $ref: './components/schemas/Error.yaml'
+
+  responses:
+    BadRequest:
+      $ref: './components/responses/common.yaml#/BadRequest'
+    Unauthorized:
+      $ref: './components/responses/common.yaml#/Unauthorized'
+    Forbidden:
+      $ref: './components/responses/common.yaml#/Forbidden'
+    NotFound:
+      $ref: './components/responses/common.yaml#/NotFound'
+    InternalServerError:
+      $ref: './components/responses/common.yaml#/InternalServerError'

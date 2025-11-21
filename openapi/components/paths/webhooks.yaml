@@ -1,0 +1,62 @@
+/webhooks/stripe:
+  post:
+    tags:
+      - Webhooks
+    summary: Stripe webhook endpoint
+    description: |
+      Receives webhook events from Stripe for subscription lifecycle management.
+      This is a PUBLIC endpoint (no JWT required) secured by Stripe webhook signature verification.
+
+      Handles the following events:
+      - customer.subscription.created
+      - customer.subscription.updated
+      - customer.subscription.deleted
+      - invoice.payment_succeeded
+      - invoice.payment_failed
+      - customer.updated
+
+      Updates account subscription status, billing periods, and payment method details automatically.
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Stripe webhook event payload
+    parameters:
+      - name: Stripe-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Stripe webhook signature for verification
+    responses:
+      '200':
+        description: Webhook received and processed successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                received:
+                  type: boolean
+                  example: true
+      '401':
+        description: Invalid webhook signature
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Invalid webhook signature
+      '500':
+        description: Webhook processing failed
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Webhook processing failed

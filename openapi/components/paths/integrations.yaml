@@ -1,0 +1,141 @@
+/integrations:
+  get:
+    tags:
+      - Integrations
+    summary: List available integrations
+    description: Get list of available PMS integrations
+    responses:
+      '200':
+        description: Available integrations
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        example: airbnb
+                      name:
+                        type: string
+                        example: Airbnb
+                      enabled:
+                        type: boolean
+
+/integrations/{property_id}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Integrations
+    summary: Get property integrations
+    responses:
+      '200':
+        description: Property integrations
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Integration.yaml'
+
+/integrations/{property_id}/{pms_type}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - name: pms_type
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [airbnb, vrbo, booking_com, guesty, hostaway]
+
+  post:
+    tags:
+      - Integrations
+    summary: Connect PMS integration
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - credentials
+            properties:
+              credentials:
+                type: object
+                description: PMS-specific credentials
+              auto_sync:
+                type: boolean
+                default: true
+    responses:
+      '201':
+        description: Integration connected
+
+  put:
+    tags:
+      - Integrations
+    summary: Update integration settings
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              credentials:
+                type: object
+              auto_sync:
+                type: boolean
+    responses:
+      '200':
+        description: Integration updated
+
+  delete:
+    tags:
+      - Integrations
+    summary: Disconnect integration
+    responses:
+      '200':
+        description: Integration disconnected
+
+/integrations/{property_id}/{pms_type}/sync:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - name: pms_type
+      in: path
+      required: true
+      schema:
+        type: string
+
+  post:
+    tags:
+      - Integrations
+    summary: Trigger manual sync
+    description: Manually sync bookings from PMS
+    responses:
+      '200':
+        description: Sync triggered
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                synced_bookings:
+                  type: integer

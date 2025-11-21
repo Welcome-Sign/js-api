@@ -1,0 +1,292 @@
+/properties/{property_id}/bookings:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Bookings
+    summary: List property bookings
+    parameters:
+      - name: start_date
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: end_date
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: status
+        in: query
+        schema:
+          type: string
+          enum: [confirmed, cancelled, completed, in_progress]
+    responses:
+      '200':
+        description: List of bookings
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Booking.yaml'
+
+  post:
+    tags:
+      - Bookings
+    summary: Create booking
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - check_in
+              - check_out
+            properties:
+              room_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Room ID for room-specific booking (null for whole property)
+              pms_booking_id:
+                type: string
+                description: External PMS booking ID
+              guest_name:
+                type: string
+                example: John Doe
+              guest_email:
+                type: string
+                format: email
+                example: john@example.com
+              guest_phone:
+                type: string
+                example: "5551234567"
+              check_in:
+                type: string
+                format: date-time
+                description: Check-in date and time
+                example: '2024-12-01T16:00:00'
+              check_out:
+                type: string
+                format: date-time
+                description: Check-out date and time
+                example: '2024-12-05T10:00:00'
+              num_guests:
+                type: integer
+                minimum: 1
+                example: 2
+              status:
+                type: string
+                enum: [confirmed, cancelled, completed, in_progress]
+                default: confirmed
+              source:
+                type: string
+                example: airbnb
+    responses:
+      '201':
+        description: Booking created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Booking.yaml'
+
+/properties/{property_id}/bookings/{id}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  get:
+    tags:
+      - Bookings
+    summary: Get booking details
+    responses:
+      '200':
+        description: Booking details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Booking.yaml'
+
+  put:
+    tags:
+      - Bookings
+    summary: Update booking
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              room_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Room ID for room-specific booking (null for whole property)
+              pms_booking_id:
+                type: string
+                description: External PMS booking ID
+              guest_name:
+                type: string
+              guest_email:
+                type: string
+                format: email
+              guest_phone:
+                type: string
+              check_in:
+                type: string
+                format: date-time
+                description: Check-in date and time
+              check_out:
+                type: string
+                format: date-time
+                description: Check-out date and time
+              num_guests:
+                type: integer
+                minimum: 1
+              status:
+                type: string
+                enum: [confirmed, cancelled, completed, in_progress]
+              source:
+                type: string
+    responses:
+      '200':
+        description: Booking updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  $ref: '../schemas/Booking.yaml'
+
+  delete:
+    tags:
+      - Bookings
+    summary: Delete booking
+    responses:
+      '200':
+        description: Booking deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: string
+                data:
+                  type: string
+                  example: "Booking deleted successfully"
+      '403':
+        $ref: '../responses/common.yaml#/Forbidden'
+      '404':
+        $ref: '../responses/common.yaml#/NotFound'
+
+/properties/{property_id}/bookings/current:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Bookings
+    summary: Get current booking
+    description: Get the active booking for current date
+    responses:
+      '200':
+        description: Current booking
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Booking.yaml'
+      '404':
+        description: No current booking
+
+/bookings:
+  get:
+    tags:
+      - Bookings
+    summary: List all bookings
+    description: Get all bookings across all properties
+    parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of bookings
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Booking.yaml'
+
+/bookings/upcoming:
+  get:
+    tags:
+      - Bookings
+    summary: List upcoming bookings
+    description: Get all future bookings
+    responses:
+      '200':
+        description: List of upcoming bookings
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Booking.yaml'

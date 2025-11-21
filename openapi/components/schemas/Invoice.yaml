@@ -1,0 +1,16 @@
+type: object
+properties:
+  id:
+    type: string
+  amount:
+    type: number
+  currency:
+    type: string
+  status:
+    type: string
+  invoice_pdf:
+    type: string
+    format: uri
+  created_at:
+    type: string
+    format: date-time

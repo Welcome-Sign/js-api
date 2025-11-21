@@ -1,0 +1,20 @@
+type: object
+properties:
+  id:
+    type: string
+  type:
+    type: string
+    enum: [card]
+  card:
+    type: object
+    properties:
+      brand:
+        type: string
+      last4:
+        type: string
+      exp_month:
+        type: integer
+      exp_year:
+        type: integer
+  is_default:
+    type: boolean

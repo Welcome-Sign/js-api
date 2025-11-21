@@ -1,0 +1,448 @@
+/accounts:
+  get:
+    tags:
+      - Accounts
+    summary: List all accessible accounts
+    description: Get all accounts the authenticated user has access to (owned + shared)
+    responses:
+      '200':
+        description: List of accounts
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Account.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  post:
+    tags:
+      - Accounts
+    summary: Create account
+    description: |
+      Create a business account for the authenticated user during onboarding.
+      Each user can only have one owned account. Additional account access is granted via invitations.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                description: Business or organization name
+                example: Sunset Rentals LLC
+              address_line1:
+                type: string
+                example: 123 Main Street
+              address_line2:
+                type: string
+                example: Suite 100
+              city:
+                type: string
+                example: Miami
+              state:
+                type: string
+                example: FL
+              zip:
+                type: string
+                example: 33139
+              phone:
+                type: string
+                example: +1-555-123-4567
+              email:
+                type: string
+                format: email
+                example: contact@sunsetrentals.com
+              num_properties:
+                type: string
+                enum: ['1', '2-5', '6-10', '11-25', '26-50', '50+']
+                description: Number of properties managed
+                example: '2-5'
+    responses:
+      '201':
+        description: Account created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 201
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Account.yaml'
+      '400':
+        description: Missing required field
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Business name is required
+      '409':
+        description: Account already exists
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account already exists for this user
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+/accounts/me:
+  get:
+    tags:
+      - Accounts
+    summary: Get current user's account
+    description: Get the account owned by the authenticated user
+    responses:
+      '200':
+        description: Account details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Account.yaml'
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account not found. Please complete onboarding.
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  put:
+    tags:
+      - Accounts
+    summary: Update current user's account
+    description: Update the account owned by the authenticated user
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Business or organization name
+              address_line1:
+                type: string
+              address_line2:
+                type: string
+              city:
+                type: string
+              state:
+                type: string
+              zip:
+                type: string
+              phone:
+                type: string
+              email:
+                type: string
+                format: email
+              num_properties:
+                type: string
+                enum: ['1', '2-5', '6-10', '11-25', '26-50', '50+']
+    responses:
+      '200':
+        description: Account updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Account.yaml'
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/accounts/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Account UUID
+
+  get:
+    tags:
+      - Accounts
+    summary: Get account details
+    description: Get details of a specific account. User must have access to the account (owner or shared).
+    responses:
+      '200':
+        description: Account details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Account.yaml'
+      '400':
+        description: Account ID missing
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Account ID is required
+      '403':
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Access denied to this account
+      '404':
+        description: Account not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/accounts/{account_id}/users:
+  parameters:
+    - $ref: '../parameters/common.yaml#/AccountId'
+
+  get:
+    tags:
+      - Accounts
+    summary: List account users
+    description: Get all users who have access to this account
+    responses:
+      '200':
+        description: List of account users
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/AccountUser.yaml'
+
+  post:
+    tags:
+      - Accounts
+    summary: Invite user to account
+    description: Send invitation email to add user to account
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - role
+            properties:
+              email:
+                type: string
+                format: email
+              role:
+                type: string
+                enum: [owner, admin, member, viewer]
+              properties:
+                type: array
+                description: Specific property IDs user can access (optional, empty = all)
+                items:
+                  type: string
+    responses:
+      '201':
+        description: Invitation sent
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/Invitation.yaml'
+
+/accounts/{account_id}/users/{user_id}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/AccountId'
+    - name: user_id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  get:
+    tags:
+      - Accounts
+    summary: Get account user details
+    responses:
+      '200':
+        description: User details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/AccountUser.yaml'
+
+  put:
+    tags:
+      - Accounts
+    summary: Update account user
+    description: Update user role or permissions
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [owner, admin, member, viewer]
+              properties:
+                type: array
+                items:
+                  type: string
+    responses:
+      '200':
+        description: User updated
+
+  delete:
+    tags:
+      - Accounts
+    summary: Remove user from account
+    responses:
+      '200':
+        description: User removed
+
+/invitations:
+  get:
+    tags:
+      - Accounts
+    summary: List pending invitations
+    description: Get all pending invitations for current user
+    responses:
+      '200':
+        description: List of invitations
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Invitation.yaml'
+
+/invitations/{token}/accept:
+  parameters:
+    - name: token
+      in: path
+      required: true
+      schema:
+        type: string
+
+  post:
+    tags:
+      - Accounts
+    summary: Accept invitation
+    responses:
+      '200':
+        description: Invitation accepted
+
+/invitations/{token}/decline:
+  parameters:
+    - name: token
+      in: path
+      required: true
+      schema:
+        type: string
+
+  post:
+    tags:
+      - Accounts
+    summary: Decline invitation
+    responses:
+      '200':
+        description: Invitation declined

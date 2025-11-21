@@ -1,0 +1,68 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Device UUID
+    example: 550e8400-e29b-41d4-a716-446655440001
+  property_id:
+    type: string
+    format: uuid
+    description: Property UUID this device belongs to
+    example: 550e8400-e29b-41d4-a716-446655440000
+  room_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: Room UUID this device is assigned to (null if not assigned)
+    example: 550e8400-e29b-41d4-a716-446655440002
+  name:
+    type: string
+    description: Human-friendly device name
+    example: Living Room TV
+    nullable: true
+  platform:
+    type: string
+    enum: [roku, android, firetv, webos, tizen, smart_tv, web]
+    description: Device platform type
+    example: roku
+  device_identifier:
+    type: string
+    description: Unique device identifier (serial number, MAC address, etc.)
+    example: roku-serial-12345
+  device_token:
+    type: string
+    description: |
+      Secure device authentication token (64-character hex string).
+      Only returned during device registration. Not included in regular device queries for security.
+    example: a1b2c3d4e5f6789012345678901234567890123456789012345678901234
+    nullable: true
+  pairing_key:
+    type: string
+    description: |
+      Unique pairing key for the device (64-character hex string).
+      Generated during device registration.
+    example: b2c3d4e5f67890123456789012345678901234567890123456789012345678
+    nullable: true
+  theme:
+    type: string
+    description: Display theme for the device
+    example: default
+    default: default
+    enum: [default, dark, light, custom]
+  location:
+    type: string
+    description: Physical location of the device
+    example: Living Room
+    nullable: true
+  last_seen_at:
+    type: string
+    format: date-time
+    description: Last time device checked in (heartbeat)
+    example: '2025-01-15 10:30:00'
+    nullable: true
+  created_at:
+    type: string
+    format: date-time
+    description: When device was registered
+    example: '2025-01-15 10:00:00'

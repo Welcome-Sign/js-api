@@ -1,0 +1,10 @@
+type: object
+properties:
+  notifications_enabled:
+    type: boolean
+  email_notifications:
+    type: boolean
+  timezone:
+    type: string
+  language:
+    type: string

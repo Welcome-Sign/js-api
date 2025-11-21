@@ -1,0 +1,48 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Unique identifier for the content item
+    example: 550e8400-e29b-41d4-a716-446655440000
+  property_id:
+    type: string
+    format: uuid
+    description: Property this content belongs to
+    example: 550e8400-e29b-41d4-a716-446655440001
+  room_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: Optional room targeting (null = property-wide)
+    example: 550e8400-e29b-41d4-a716-446655440002
+  device_id:
+    type: string
+    format: uuid
+    nullable: true
+    description: Optional device targeting (null = room/property-wide)
+    example: 550e8400-e29b-41d4-a716-446655440003
+  content_type:
+    type: string
+    description: Type of content (e.g., welcome_message, house_rules, wifi_info, checkout_info, emergency_contact)
+    example: welcome_message
+  data:
+    type: object
+    description: Content data (structure varies by content_type)
+    example:
+      message: "Welcome to our vacation home!"
+      guest_name: "John"
+  created_at:
+    type: string
+    format: date-time
+    description: When content was created
+    example: "2025-01-15T10:30:00Z"
+  updated_at:
+    type: string
+    format: date-time
+    description: When content was last updated
+    example: "2025-01-15T10:30:00Z"
+required:
+  - id
+  - property_id
+  - content_type

@@ -1,0 +1,258 @@
+/pricing/plans:
+  get:
+    tags:
+      - Pricing
+    summary: Get all available subscription plans
+    description: Returns all visible subscription plans with pricing, features, and limits. Public endpoint - no authentication required.
+    operationId: getPricingPlans
+    responses:
+      '200':
+        description: List of subscription plans
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plans:
+                  type: array
+                  items:
+                    $ref: '../schemas/PricingPlan.yaml'
+                metadata:
+                  type: object
+                  properties:
+                    currency:
+                      type: string
+                      example: USD
+                    currency_symbol:
+                      type: string
+                      example: $
+                    annual_discount_percentage:
+                      type: integer
+                      example: 20
+            example:
+              plans:
+                - id: free
+                  name: Free
+                  description: Get started with basic features
+                  price_monthly: 0
+                  price_annual: 0
+                  limits:
+                    properties: 1
+                    devices: 2
+                    content: 5
+                  features:
+                    rooms: false
+                    analytics: false
+                  display:
+                    popular: false
+                    recommended: false
+                    visible: true
+                - id: pro
+                  name: Pro
+                  description: Advanced features for growing businesses
+                  price_monthly: 99.00
+                  price_annual: 950.00
+                  limits:
+                    properties: 25
+                    devices: -1
+                    content: 100
+                  features:
+                    rooms: true
+                    analytics: true
+                  display:
+                    popular: true
+                    recommended: true
+                    visible: true
+              metadata:
+                currency: USD
+                currency_symbol: $
+
+/pricing/plans/{id}:
+  get:
+    tags:
+      - Pricing
+    summary: Get a specific subscription plan
+    description: Returns details for a single subscription plan by ID. Public endpoint - no authentication required.
+    operationId: getPricingPlan
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Plan ID (e.g., free, basic, pro, enterprise, lifetime_founder)
+        schema:
+          type: string
+          enum: [free, basic, pro, enterprise, lifetime_founder]
+    responses:
+      '200':
+        description: Plan details
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/PricingPlan.yaml'
+            example:
+              id: pro
+              name: Pro
+              description: Advanced features for growing businesses
+              tagline: Most popular for property managers
+              price_monthly: 99.00
+              price_annual: 950.00
+              trial_days: 14
+              limits:
+                properties: 25
+                devices: -1
+                content: 100
+                recommendations: 100
+              features:
+                basic_welcome_screen: true
+                wifi_info_display: true
+                rooms: true
+                analytics: true
+                integrations: true
+                content_scheduling: true
+                api_access: false
+                white_label: false
+              display:
+                popular: true
+                recommended: true
+                visible: true
+                sort_order: 3
+      '404':
+        $ref: '../responses/common.yaml#/NotFound'
+
+/pricing/compare:
+  get:
+    tags:
+      - Pricing
+    summary: Get feature comparison matrix
+    description: Returns a comparison matrix of all plans and their features. Useful for building pricing comparison tables. Public endpoint - no authentication required.
+    operationId: getPricingComparison
+    responses:
+      '200':
+        description: Feature comparison matrix
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plans:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      price_monthly:
+                        type: number
+                        nullable: true
+                      price_annual:
+                        type: number
+                        nullable: true
+                      price_lifetime:
+                        type: number
+                        nullable: true
+                      popular:
+                        type: boolean
+                      recommended:
+                        type: boolean
+                features:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Human-readable feature name
+                      values:
+                        type: object
+                        description: Feature availability by plan ID
+                        additionalProperties:
+                          type: boolean
+            example:
+              plans:
+                - id: basic
+                  name: Basic
+                  price_monthly: 29.00
+                  popular: false
+                  recommended: false
+                - id: pro
+                  name: Pro
+                  price_monthly: 99.00
+                  popular: true
+                  recommended: true
+              features:
+                - name: Multi-Room Support
+                  values:
+                    basic: false
+                    pro: true
+                    enterprise: true
+                - name: Analytics Dashboard
+                  values:
+                    basic: false
+                    pro: true
+                    enterprise: true
+
+/pricing/availability/lifetime:
+  get:
+    tags:
+      - Pricing
+    summary: Get lifetime plan availability
+    description: Returns availability status and countdown information for the lifetime founder plan. Public endpoint - no authentication required.
+    operationId: getLifetimeAvailability
+    responses:
+      '200':
+        description: Lifetime plan availability status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                  description: Whether the lifetime plan is currently available for purchase
+                purchased_count:
+                  type: integer
+                  description: Number of lifetime plans sold so far
+                max_purchases:
+                  type: integer
+                  nullable: true
+                  description: Maximum number of lifetime plans available (null if unlimited)
+                remaining:
+                  type: integer
+                  nullable: true
+                  description: Number of lifetime plans remaining
+                available_until:
+                  type: string
+                  format: date
+                  nullable: true
+                  description: Date when lifetime plan offer expires
+                days_remaining:
+                  type: integer
+                  nullable: true
+                  description: Number of days until offer expires
+                price:
+                  type: number
+                  description: Current price of lifetime plan
+                sold_out:
+                  type: boolean
+                  description: Whether the lifetime plan is sold out
+                expired:
+                  type: boolean
+                  description: Whether the lifetime plan offer has expired
+            example:
+              available: true
+              purchased_count: 147
+              max_purchases: 200
+              remaining: 53
+              available_until: "2025-03-15"
+              days_remaining: 45
+              price: 799.00
+              sold_out: false
+              expired: false
+      '404':
+        description: Lifetime plan not configured
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'

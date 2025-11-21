@@ -1,0 +1,334 @@
+/content:
+  get:
+    tags:
+      - Content
+    summary: List all content
+    description: Get all content across all properties for authenticated user
+    responses:
+      '200':
+        description: List of content
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Content.yaml'
+
+  post:
+    tags:
+      - Content
+    summary: Create content
+    description: |
+      Create new content item. User must have access to the specified property.
+      Optionally target a specific room or device for granular content delivery.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - property_id
+              - content_type
+            properties:
+              property_id:
+                type: string
+                format: uuid
+                description: Property to create content for
+                example: 550e8400-e29b-41d4-a716-446655440000
+              room_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Optional room targeting
+                example: 550e8400-e29b-41d4-a716-446655440001
+              device_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Optional device targeting
+                example: 550e8400-e29b-41d4-a716-446655440002
+              content_type:
+                type: string
+                description: Type of content
+                example: welcome_message
+              data:
+                type: object
+                description: Content data (structure varies by content_type)
+                example:
+                  message: "Welcome to our vacation home!"
+    responses:
+      '201':
+        description: Content created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 201
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Content.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied or subscription limit reached
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Property not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+/content/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Content item ID
+
+  get:
+    tags:
+      - Content
+    summary: Get content details
+    description: Get specific content item. User must have access to the content.
+    responses:
+      '200':
+        description: Content details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Content.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this content
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Content not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+  put:
+    tags:
+      - Content
+    summary: Update content
+    description: |
+      Update content item. User must have access to the content.
+      Cannot change property_id.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              room_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Update room targeting (null to clear)
+              device_id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Update device targeting (null to clear)
+              content_type:
+                type: string
+                description: Update content type
+              data:
+                type: object
+                description: Update content data
+    responses:
+      '200':
+        description: Content updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: object
+                data:
+                  $ref: '../schemas/Content.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this content
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+  delete:
+    tags:
+      - Content
+    summary: Delete content
+    description: Delete content item. User must have access to the content.
+    responses:
+      '200':
+        description: Content deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: string
+                data:
+                  type: string
+                  example: Content deleted successfully
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this content
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '500':
+        $ref: '../responses/common.yaml#/InternalServerError'
+
+/properties/{property_id}/content:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+
+  get:
+    tags:
+      - Content
+    summary: List property content
+    description: Get all content for a specific property. User must have access to the property.
+    responses:
+      '200':
+        description: List of content
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Content.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this property
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+
+/properties/{property_id}/content/{type}:
+  parameters:
+    - $ref: '../parameters/common.yaml#/PropertyId'
+    - name: type
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Content type to filter by (e.g., welcome_message, house_rules)
+      example: welcome_message
+
+  get:
+    tags:
+      - Content
+    summary: List property content by type
+    description: Get all content of a specific type for a property. User must have access to the property.
+    responses:
+      '200':
+        description: List of content
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  example: 200
+                success:
+                  type: string
+                  example: "true"
+                type:
+                  type: string
+                  example: array
+                data:
+                  type: array
+                  items:
+                    $ref: '../schemas/Content.yaml'
+      '400':
+        $ref: '../responses/common.yaml#/BadRequest'
+      '403':
+        description: Access denied to this property
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'

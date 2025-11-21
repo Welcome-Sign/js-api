@@ -1,0 +1,138 @@
+/users/me:
+  get:
+    tags:
+      - Users
+    summary: Get current user profile
+    responses:
+      '200':
+        description: User profile retrieved
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/User.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+      '404':
+        description: User not found (user may have been deleted)
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: User not found
+
+  put:
+    tags:
+      - Users
+    summary: Update current user profile
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+                format: email
+              phone:
+                type: string
+    responses:
+      '200':
+        description: Profile updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/User.yaml'
+
+  delete:
+    tags:
+      - Users
+    summary: Delete user account
+    responses:
+      '200':
+        description: Account deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+
+/users/me/password:
+  put:
+    tags:
+      - Users
+    summary: Change password
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - current_password
+              - new_password
+            properties:
+              current_password:
+                type: string
+                format: password
+              new_password:
+                type: string
+                format: password
+                minLength: 8
+    responses:
+      '200':
+        description: Password changed
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/users/me/settings:
+  get:
+    tags:
+      - Users
+    summary: Get user settings
+    responses:
+      '200':
+        description: Settings retrieved
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                data:
+                  $ref: '../schemas/UserSettings.yaml'
+
+  put:
+    tags:
+      - Users
+    summary: Update user settings
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/UserSettings.yaml'
+    responses:
+      '200':
+        description: Settings updated

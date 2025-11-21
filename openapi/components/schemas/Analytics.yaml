@@ -1,0 +1,14 @@
+type: object
+properties:
+  views:
+    type: integer
+  unique_visitors:
+    type: integer
+  average_session_duration:
+    type: number
+  device_uptime:
+    type: number
+  events:
+    type: array
+    items:
+      type: object

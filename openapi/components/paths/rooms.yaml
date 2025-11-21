@@ -1,0 +1,228 @@
+/properties/{property_id}/rooms:
+  get:
+    tags:
+      - Rooms
+    summary: List rooms for a property
+    description: |
+      Get all rooms for a specific property. Requires Pro or Enterprise subscription.
+      Rooms allow content and devices to be targeted to specific areas within a property.
+    parameters:
+      - name: property_id
+        in: path
+        required: true
+        description: Property UUID
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: List of rooms
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/Room.yaml'
+      '403':
+        description: Access denied or rooms feature not enabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            examples:
+              access_denied:
+                value:
+                  error: true
+                  message: Access denied to this property
+              feature_disabled:
+                value:
+                  error: true
+                  message: Rooms feature requires Pro or Enterprise subscription
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  post:
+    tags:
+      - Rooms
+    summary: Create a room
+    description: |
+      Create a new room for a property. Requires Pro or Enterprise subscription.
+    parameters:
+      - name: property_id
+        in: path
+        required: true
+        description: Property UUID
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                description: Room name
+                example: Living Room
+              description:
+                type: string
+                description: Optional description
+                example: Main living area with 65" TV
+    responses:
+      '201':
+        description: Room created
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Room.yaml'
+      '400':
+        description: Missing required fields
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Room name is required
+      '403':
+        description: Access denied or rooms feature not enabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+/rooms/{id}:
+  get:
+    tags:
+      - Rooms
+    summary: Get a room
+    description: Get a single room by ID. Requires Pro or Enterprise subscription.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Room UUID
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Room details
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Room.yaml'
+      '403':
+        description: Access denied or rooms feature not enabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Room not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+            example:
+              error: true
+              message: Room not found
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  put:
+    tags:
+      - Rooms
+    summary: Update a room
+    description: Update a room's name or description. Requires Pro or Enterprise subscription.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Room UUID
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Room name
+                example: Master Bedroom
+              description:
+                type: string
+                description: Optional description
+                example: Primary bedroom with wall-mounted TV
+    responses:
+      '200':
+        description: Room updated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Room.yaml'
+      '403':
+        description: Access denied or rooms feature not enabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Room not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'
+
+  delete:
+    tags:
+      - Rooms
+    summary: Delete a room
+    description: |
+      Delete a room. Devices assigned to this room will have their room_id set to null.
+      Requires Pro or Enterprise subscription.
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Room UUID
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Room deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Room deleted successfully
+      '403':
+        description: Access denied or rooms feature not enabled
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '404':
+        description: Room not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/Error.yaml'
+      '401':
+        $ref: '../responses/common.yaml#/Unauthorized'

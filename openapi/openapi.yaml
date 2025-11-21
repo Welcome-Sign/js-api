@@ -20,12 +20,10 @@ info:
     name: Proprietary
 
 servers:
-  - url: https://api.welcomesign.com/v1
+  - url: https://api.welcomesign.com
     description: Production server
-  - url: https://staging-api.welcomesign.com/v1
+  - url: https://staging-api.welcomesign.com
     description: Staging server
-  - url: http://localhost:8080/v1
-    description: Local development server
 
 tags:
   - name: Authentication

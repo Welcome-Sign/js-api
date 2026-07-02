@@ -187,3 +187,24 @@
                   values:
                     free: false
                     pro: true
+
+/pricing/payment-config:
+  get:
+    tags:
+      - Pricing
+    summary: Get payment provider browser configuration
+    description: Returns the Stripe publishable key used to initialize Stripe Elements in the browser. Sourced from the backend environment so the frontend never hardcodes keys. Public endpoint - no authentication required.
+    operationId: getPaymentConfig
+    responses:
+      '200':
+        description: Payment configuration
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                publishable_key:
+                  type: string
+                  nullable: true
+                  description: Stripe publishable key (pk_live_... or pk_test_...); null if not configured
+                  example: pk_live_xxxxxxxxxxxxxxxxx

@@ -1122,7 +1122,7 @@
     /**
      * Create a new subscription (Free → Paid upgrade)
      * @param {Object} subscriptionData - Subscription data
-     * @param {string} subscriptionData.plan - Plan tier: basic, pro, enterprise
+     * @param {string} subscriptionData.plan - Plan tier: pro
      * @param {string} subscriptionData.payment_token - Stripe payment method token from Stripe Elements (pm_xxx)
      * @returns {Promise<Object>} Created subscription with plan, status, and current_period_end
      */
@@ -1219,17 +1219,6 @@
       });
     }
 
-    /**
-     * Purchase Lifetime Founder plan (one-time payment)
-     * @param {string} paymentToken - Stripe payment method token from Stripe Elements (pm_xxx)
-     * @returns {Promise<Object>} Lifetime subscription confirmation
-     */
-    async purchaseLifetimePlan(paymentToken) {
-      return this._request('/subscriptions/lifetime', {
-        method: 'POST',
-        body: { payment_token: paymentToken }
-      });
-    }
 
     // =========================================================================
     // PRICING (Public endpoints - no authentication required)
@@ -1249,7 +1238,7 @@
     /**
      * Get a specific subscription plan by ID
      * Public endpoint - no authentication required
-     * @param {string} planId - Plan ID (free, basic, pro, enterprise, lifetime_founder)
+     * @param {string} planId - Plan ID (free, pro)
      * @returns {Promise<Object>} Plan details with pricing, limits, and features
      */
     async getPricingPlan(planId) {
@@ -1269,16 +1258,6 @@
       });
     }
 
-    /**
-     * Get lifetime founder plan availability status
-     * Public endpoint - no authentication required
-     * @returns {Promise<Object>} Availability status with purchase count, remaining slots, and expiration
-     */
-    async getLifetimeAvailability() {
-      return this._request('/pricing/availability/lifetime', {
-        auth: false
-      });
-    }
 
     // =========================================================================
     // UTILITY METHODS FOR LIMITS AND PRICING

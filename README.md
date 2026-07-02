@@ -488,9 +488,6 @@ await client.cancelSubscription(true);       // Cancel immediately
 // Reactivate cancelled subscription
 await client.reactivateSubscription();
 
-// Purchase lifetime plan
-await client.purchaseLifetimePlan('pm_xxx');
-
 // Get invoices
 const invoices = await client.getInvoices();
 
@@ -516,14 +513,10 @@ const { plans, metadata } = await client.getPricingPlans();
 
 // Get specific plan
 const plan = await client.getPricingPlan('pro');
-// plan IDs: free, basic, pro, enterprise, lifetime_founder
+// plan IDs: free, pro
 
 // Get feature comparison matrix
 const comparison = await client.getPricingComparison();
-
-// Check lifetime plan availability
-const availability = await client.getLifetimeAvailability();
-// Returns: { available: true, purchased: 45, remaining: 155, expires_at: "..." }
 ```
 
 ### Utility Methods

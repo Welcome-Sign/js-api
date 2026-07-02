@@ -26,15 +26,15 @@
                     currency_symbol:
                       type: string
                       example: $
-                    annual_discount_percentage:
-                      type: integer
-                      example: 20
+                    billing_interval:
+                      type: string
+                      example: annual
             example:
               plans:
                 - id: free
                   name: Free
-                  description: Get started with basic features
-                  price_monthly: 0
+                  description: Free forever for your first location
+                  price_monthly: null
                   price_annual: 0
                   limits:
                     properties: 1
@@ -49,11 +49,11 @@
                     visible: true
                 - id: pro
                   name: Pro
-                  description: Advanced features for growing businesses
-                  price_monthly: 99.00
-                  price_annual: 950.00
+                  description: Up to 5 locations with unlimited TVs per location
+                  price_monthly: null
+                  price_annual: 29.00
                   limits:
-                    properties: 25
+                    properties: 5
                     devices: -1
                     content: 100
                   features:
@@ -78,10 +78,10 @@
       - name: id
         in: path
         required: true
-        description: Plan ID (e.g., free, basic, pro, enterprise, lifetime_founder)
+        description: Plan ID (e.g., free, pro)
         schema:
           type: string
-          enum: [free, basic, pro, enterprise, lifetime_founder]
+          enum: [free, pro]
     responses:
       '200':
         description: Plan details
@@ -92,13 +92,13 @@
             example:
               id: pro
               name: Pro
-              description: Advanced features for growing businesses
-              tagline: Most popular for property managers
-              price_monthly: 99.00
-              price_annual: 950.00
-              trial_days: 14
+              description: Up to 5 locations with unlimited TVs per location
+              tagline: Everything you need as you grow
+              price_monthly: null
+              price_annual: 29.00
+              trial_days: 0
               limits:
-                properties: 25
+                properties: 5
                 devices: -1
                 content: 100
                 recommendations: 100
@@ -115,7 +115,7 @@
                 popular: true
                 recommended: true
                 visible: true
-                sort_order: 3
+                sort_order: 2
       '404':
         $ref: '../responses/common.yaml#/NotFound'
 
@@ -149,9 +149,6 @@
                       price_annual:
                         type: number
                         nullable: true
-                      price_lifetime:
-                        type: number
-                        nullable: true
                       popular:
                         type: boolean
                       recommended:
@@ -171,88 +168,22 @@
                           type: boolean
             example:
               plans:
-                - id: basic
-                  name: Basic
-                  price_monthly: 29.00
+                - id: free
+                  name: Free
+                  price_annual: 0
                   popular: false
                   recommended: false
                 - id: pro
                   name: Pro
-                  price_monthly: 99.00
+                  price_annual: 29.00
                   popular: true
                   recommended: true
               features:
                 - name: Multi-Room Support
                   values:
-                    basic: false
+                    free: false
                     pro: true
-                    enterprise: true
                 - name: Analytics Dashboard
                   values:
-                    basic: false
+                    free: false
                     pro: true
-                    enterprise: true
-
-/pricing/availability/lifetime:
-  get:
-    tags:
-      - Pricing
-    summary: Get lifetime plan availability
-    description: Returns availability status and countdown information for the lifetime founder plan. Public endpoint - no authentication required.
-    operationId: getLifetimeAvailability
-    responses:
-      '200':
-        description: Lifetime plan availability status
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                available:
-                  type: boolean
-                  description: Whether the lifetime plan is currently available for purchase
-                purchased_count:
-                  type: integer
-                  description: Number of lifetime plans sold so far
-                max_purchases:
-                  type: integer
-                  nullable: true
-                  description: Maximum number of lifetime plans available (null if unlimited)
-                remaining:
-                  type: integer
-                  nullable: true
-                  description: Number of lifetime plans remaining
-                available_until:
-                  type: string
-                  format: date
-                  nullable: true
-                  description: Date when lifetime plan offer expires
-                days_remaining:
-                  type: integer
-                  nullable: true
-                  description: Number of days until offer expires
-                price:
-                  type: number
-                  description: Current price of lifetime plan
-                sold_out:
-                  type: boolean
-                  description: Whether the lifetime plan is sold out
-                expired:
-                  type: boolean
-                  description: Whether the lifetime plan offer has expired
-            example:
-              available: true
-              purchased_count: 147
-              max_purchases: 200
-              remaining: 53
-              available_until: "2025-03-15"
-              days_remaining: 45
-              price: 799.00
-              sold_out: false
-              expired: false
-      '404':
-        description: Lifetime plan not configured
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/Error.yaml'

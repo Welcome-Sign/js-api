@@ -176,8 +176,6 @@ paths:
     $ref: './components/paths/pricing.yaml#/~1pricing~1plans~1{id}'
   /pricing/compare:
     $ref: './components/paths/pricing.yaml#/~1pricing~1compare'
-  /pricing/availability/lifetime:
-    $ref: './components/paths/pricing.yaml#/~1pricing~1availability~1lifetime'
 
   # Subscriptions
   /subscriptions:
@@ -188,8 +186,6 @@ paths:
     $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1cancel'
   /subscriptions/reactivate:
     $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1reactivate'
-  /subscriptions/lifetime:
-    $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1lifetime'
   /subscriptions/payment-method:
     $ref: './components/paths/subscriptions.yaml#/~1subscriptions~1payment-method'
   /subscriptions/plan:

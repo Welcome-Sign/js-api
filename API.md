@@ -132,14 +132,12 @@ Devices use a separate `DeviceAuth` scheme with device-specific tokens.
 - `GET /pricing/plans` - List pricing plans
 - `GET /pricing/plans/{id}` - Get plan details
 - `GET /pricing/compare` - Compare plans
-- `GET /pricing/availability/lifetime` - Check lifetime plan availability
 
 ### Subscriptions
 - `GET /subscriptions` - Get current subscription
 - `POST /subscriptions/subscribe` - Subscribe to plan
 - `POST /subscriptions/cancel` - Cancel subscription
 - `POST /subscriptions/reactivate` - Reactivate subscription
-- `POST /subscriptions/lifetime` - Purchase lifetime plan
 - `PUT /subscriptions/payment-method` - Update payment method
 - `PUT /subscriptions/plan` - Change plan
 

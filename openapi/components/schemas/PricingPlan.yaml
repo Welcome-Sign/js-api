@@ -4,7 +4,7 @@ properties:
     type: string
     description: Unique plan identifier
     example: pro
-    enum: [free, basic, pro, enterprise, lifetime_founder]
+    enum: [free, pro]
   name:
     type: string
     description: Plan display name
@@ -12,30 +12,25 @@ properties:
   description:
     type: string
     description: Plan description
-    example: Advanced features for growing businesses
+    example: Up to 5 locations with unlimited TVs per location
   tagline:
     type: string
     description: Marketing tagline
-    example: Most popular for property managers
+    example: Everything you need as you grow
   price_monthly:
     type: number
     nullable: true
-    description: Monthly price in USD (null for lifetime plans)
-    example: 99.00
+    description: Monthly price in USD (null - all paid plans are billed annually)
+    example: null
   price_annual:
     type: number
     nullable: true
-    description: Annual price in USD (null for lifetime plans)
-    example: 950.00
-  price_lifetime:
-    type: number
-    nullable: true
-    description: One-time lifetime price in USD (null for recurring plans)
-    example: 799.00
+    description: Annual price in USD
+    example: 29.00
   trial_days:
     type: integer
     description: Number of trial days included
-    example: 14
+    example: 0
   limits:
     type: object
     description: Resource limits for this plan
@@ -43,7 +38,7 @@ properties:
       properties:
         type: integer
         description: Maximum number of properties (-1 = unlimited)
-        example: 25
+        example: 5
       devices:
         type: integer
         description: Maximum number of devices per property (-1 = unlimited)
@@ -90,18 +85,10 @@ properties:
         type: boolean
         description: Remove WelcomeSign branding
         example: false
-      founder_badge:
+      priority_support:
         type: boolean
-        description: Special founder badge (lifetime_founder only)
-        example: false
-      founder_priority_support:
-        type: boolean
-        description: Priority support queue (lifetime_founder only)
-        example: false
-      founder_feature_voting:
-        type: boolean
-        description: Vote on product roadmap (lifetime_founder only)
-        example: false
+        description: Priority support queue
+        example: true
   display:
     type: object
     description: Display metadata for frontend
@@ -121,7 +108,7 @@ properties:
       sort_order:
         type: integer
         description: Display order (lower = first)
-        example: 3
+        example: 2
       badge:
         type: string
         nullable: true
@@ -132,26 +119,3 @@ properties:
         nullable: true
         description: Badge color (e.g., "gold", "red")
         example: null
-  availability:
-    type: object
-    nullable: true
-    description: Availability constraints (for limited plans like lifetime_founder)
-    properties:
-      max_purchases:
-        type: integer
-        nullable: true
-        description: Maximum number of purchases allowed
-        example: 200
-      available_until:
-        type: string
-        format: date
-        nullable: true
-        description: Date when offer expires
-        example: "2025-03-15"
-required:
-  - id
-  - name
-  - description
-  - limits
-  - features
-  - display

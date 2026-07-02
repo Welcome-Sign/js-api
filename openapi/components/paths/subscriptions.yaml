@@ -28,13 +28,9 @@
                   properties:
                     tier:
                       type: string
-                      enum: [free, basic, pro, enterprise, lifetime_founder]
+                      enum: [free, pro]
                       example: pro
                       description: Current subscription tier
-                    is_lifetime:
-                      type: boolean
-                      example: false
-                      description: Is this a lifetime subscription
                     limits:
                       type: object
                       properties:
@@ -81,18 +77,6 @@
                           type: boolean
                           example: false
                           description: REST API access for third parties (Enterprise only)
-                        founder_badge:
-                          type: boolean
-                          example: false
-                          description: Founder badge display (Lifetime Founder only)
-                        founder_priority_support:
-                          type: boolean
-                          example: false
-                          description: Priority support queue access (Lifetime Founder only)
-                        founder_feature_voting:
-                          type: boolean
-                          example: false
-                          description: Product roadmap voting rights (Lifetime Founder only)
                     usage:
                       type: object
                       properties:
@@ -156,13 +140,7 @@
       Create a new subscription for the authenticated user. User must have completed onboarding.
       Accepts a payment token from frontend (Stripe Elements) and creates both customer and subscription.
       Frontend never sees payment provider branding - completely white-labeled.
-
-      **Trial Periods:**
-      - Basic plan: 14-day trial
-      - Pro plan: 14-day trial
-      - Enterprise plan: 30-day trial
-      - Trial periods are automatically applied from pricing configuration
-      - No charge until trial ends
+      Pro is the only paid plan and is billed annually ($29/year).
     requestBody:
       required: true
       content:
@@ -175,7 +153,7 @@
             properties:
               plan:
                 type: string
-                enum: [basic, pro, enterprise]
+                enum: [pro]
                 description: Subscription plan tier
                 example: pro
               payment_token:
@@ -230,7 +208,7 @@
               missing_plan:
                 value:
                   error: true
-                  message: 'Plan is required (basic, pro, enterprise)'
+                  message: 'Plan is required (pro)'
               missing_token:
                 value:
                   error: true
@@ -238,7 +216,7 @@
               invalid_plan:
                 value:
                   error: true
-                  message: 'Invalid plan. Must be: basic, pro, or enterprise'
+                  message: 'Invalid plan. Must be: pro'
       '404':
         description: Account not found
         content:
@@ -365,130 +343,6 @@
       '401':
         $ref: '../responses/common.yaml#/Unauthorized'
 
-/subscriptions/lifetime:
-  post:
-    tags:
-      - Subscriptions
-    summary: Purchase Lifetime Founder plan (one-time payment)
-    description: |
-      Purchase the exclusive Lifetime Founder plan with a one-time payment of $799.
-
-      **Limited Availability:** Only available to first 200-300 customers during launch period.
-
-      **Includes:**
-      - Up to 15 properties
-      - Unlimited devices
-      - 50 content items
-      - All Pro features (multi-room, analytics, scheduling, integrations)
-      - Founder badge and priority support
-      - Feature voting rights
-
-      **Restrictions:**
-      - Cannot purchase if already have lifetime subscription
-      - Must cancel existing recurring subscription first
-      - One-time payment (not refundable)
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - payment_token
-            properties:
-              payment_token:
-                type: string
-                description: Payment method token from Stripe Elements (pm_xxx)
-                example: pm_1234567890abcdef
-    responses:
-      '201':
-        description: Lifetime subscription purchased successfully
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: true
-                message:
-                  type: string
-                  example: Lifetime Founder plan purchased successfully! Welcome to the founding members.
-                subscription:
-                  type: object
-                  properties:
-                    plan:
-                      type: string
-                      example: lifetime_founder
-                    is_lifetime:
-                      type: boolean
-                      example: true
-                    status:
-                      type: string
-                      example: active
-                    purchased_at:
-                      type: string
-                      format: date-time
-                      example: '2025-01-13T10:30:00Z'
-                    features:
-                      type: object
-                      properties:
-                        properties:
-                          type: integer
-                          example: 15
-                        devices:
-                          type: string
-                          example: unlimited
-                        content:
-                          type: integer
-                          example: 50
-                        founder_badge:
-                          type: boolean
-                          example: true
-                        priority_support:
-                          type: boolean
-                          example: true
-      '400':
-        description: Invalid request
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/Error.yaml'
-            examples:
-              already_lifetime:
-                value:
-                  error: true
-                  message: You already have a lifetime subscription
-              has_subscription:
-                value:
-                  error: true
-                  message: Please cancel your current subscription before purchasing lifetime plan
-              missing_token:
-                value:
-                  error: true
-                  message: Payment token is required
-              payment_failed:
-                value:
-                  error: true
-                  message: 'Payment failed: card declined'
-      '404':
-        description: Account not found
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/Error.yaml'
-            example:
-              error: true
-              message: Account not found. Please complete onboarding.
-      '500':
-        description: Failed to process payment
-        content:
-          application/json:
-            schema:
-              $ref: '../schemas/Error.yaml'
-      '401':
-        $ref: '../responses/common.yaml#/Unauthorized'
-
 /subscriptions/payment-method:
   put:
     tags:
@@ -578,9 +432,9 @@
             properties:
               new_plan:
                 type: string
-                enum: [basic, pro, enterprise]
+                enum: [pro]
                 description: New subscription plan tier
-                example: enterprise
+                example: pro
     responses:
       '200':
         description: Plan changed successfully
@@ -600,7 +454,7 @@
                   properties:
                     plan:
                       type: string
-                      example: enterprise
+                      example: pro
                     status:
                       type: string
                       example: active
@@ -614,7 +468,7 @@
               missing_plan:
                 value:
                   error: true
-                  message: 'New plan is required (basic, pro, enterprise)'
+                  message: 'New plan is required (pro)'
               same_plan:
                 value:
                   error: true
@@ -626,7 +480,7 @@
               invalid_plan:
                 value:
                   error: true
-                  message: 'Invalid plan. Must be: basic, pro, or enterprise'
+                  message: 'Invalid plan. Must be: pro'
       '404':
         description: Account not found
         content:

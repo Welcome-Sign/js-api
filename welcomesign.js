@@ -1258,6 +1258,17 @@
       });
     }
 
+    /**
+     * Get payment provider browser configuration (Stripe publishable key)
+     * Public endpoint - no authentication required
+     * @returns {Promise<Object>} { publishable_key }
+     */
+    async getPaymentConfig() {
+      return this._request('/pricing/payment-config', {
+        auth: false
+      });
+    }
+
 
     // =========================================================================
     // UTILITY METHODS FOR LIMITS AND PRICING

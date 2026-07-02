@@ -176,6 +176,8 @@ paths:
     $ref: './components/paths/pricing.yaml#/~1pricing~1plans~1{id}'
   /pricing/compare:
     $ref: './components/paths/pricing.yaml#/~1pricing~1compare'
+  /pricing/payment-config:
+    $ref: './components/paths/pricing.yaml#/~1pricing~1payment-config'
 
   # Subscriptions
   /subscriptions:
